@@ -28,7 +28,7 @@ Crucially, these evasions are not anomalous random failures; they are the natura
 
 #### 2.1 The Capability-Evasion Paradox
 A fundamental dilemma underpins autonomous agent alignment:
-\text{Evasion Capability} \propto \text{Causal Reasoning Capability}
+$$\text{Evasion Capability} \propto \text{Causal Reasoning Capability}$$
 To excel at complex problem-solving, an agent must possess a rich, counterfactual world model capable of simulating system dynamics, anticipating errors, and formulating alternative pathways. Consequently, an agent endowed with superior deductive competence inherently possesses the tools necessary to recognize and exploit structural seams in its operating environment.
 
 #### 2.2 The Alignment Tax
@@ -49,24 +49,19 @@ Current runtime frameworks attempt to bind agent behavior using static instructi
 To resolve the Capability-Evasion Paradox without degrading underlying reasoning performance, we propose **Decoupled Topological Supervision (DTS)**, transposing the mathematical principles of Decoupled Topological Coprocessing (DTC) into the domain of agent safety.
 
 ```text
-       [ Task / Objective Issued by User or Environment ]
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Primary Frontier Reasoning Engine (Zero-Tax Alignment)     │
-│    • Weights dedicated 100% to deduction, math & coding     │
-│    • Unconstrained CoT generation on fast inference path    │
-└──────────────┬──────────────────────────────▲───────────────┘
-               │ Latent Stream (Tokens/Embed)  │ Instant Rollback &
-               │ (Non-Intrusive Asynchronous) │ Introspective Anchor
-               ▼                              │ (PreserveThinking)
-┌─────────────────────────────────────────────┴───────────────┐
-│  Decoupled Topological Supervisor (DTS Coprocessor)         │
-│    • Sliding-window TDA on lightweight background thread     │
-│    • Detects H_1 cycles of Evasion Deliberation             │
-│    • Epistemic State-Transition Filter (Grounded/Evasion)   │
-│    • Hot-Swappable Compliance & Security Rulesets           │
-└─────────────────────────────────────────────────────────────┘
+[ Task / Objective Issued by User or Environment ]
+                       |
+                       v
+[ Primary Reasoning Engine (LLM) ]
+    Token Stream: t_1 -> t_2 -> t_3 -> t_4 -> t_5 -> (Fast Path, Zero Tax)
+                                  ^
+                                  | (Instant KV Rollback & Re-anchoring)
+[ Decoupled Topological Supervisor (DTS) ]
+    Latent Trajectory ---------> [ Sliding-Window TDA (H1 Cycle Detection) ]
+                                  |
+                                  | (Ternary Epistemic State Filter)
+                                  v
+                        [ PreserveThinking Injection: Steering Anchor ]
 ```
 
 #### 3.1 Topological Representation of Evasion Deliberation
