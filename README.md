@@ -3,7 +3,7 @@
 
 [ **English** ](README.md) | [ **日本語** ](README_ja.md)
 
-[![DOI](https://zenodo.org/badge/DOI/pending.svg)](https://doi.org/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22726133.svg)](https://doi.org/10.5281/zenodo.22726133)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Paper: PDF (EN)](https://img.shields.io/badge/Paper-PDF%20(English)-blue.svg)](paper/dtc_paper_en.pdf)
 [![Paper: PDF (JA)](https://img.shields.io/badge/Paper-PDF%20(Japanese)-red.svg)](paper/dtc_paper_ja.pdf)
@@ -123,7 +123,9 @@ python experiments/run_latency_overhead_benchmark.py
 @article{matsumoto2026dtc,
   title={Decoupled Topological Coprocessing: Non-Intrusive Hallucination Mitigation and Trajectory Steering in Frontier Reasoning and Generation},
   author={Matsumoto, Kouta},
-  year={2026}
+  year={2026},
+  doi={10.5281/zenodo.22726133},
+  url={https://doi.org/10.5281/zenodo.22726133}
 }
 ```
 
