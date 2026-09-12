@@ -1,6 +1,8 @@
 # Decoupled Topological Coprocessing (DTC)
 ## Non-Intrusive Hallucination Mitigation and Trajectory Steering in Frontier Reasoning and Generation
 
+[ **English** ](README.md) | [ **日本語** ](README_ja.md)
+
 [![DOI](https://zenodo.org/badge/DOI/pending.svg)](https://doi.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Paper: PDF (EN)](https://img.shields.io/badge/Paper-PDF%20(English)-blue.svg)](paper/dtc_paper_en.pdf)
@@ -65,7 +67,10 @@ Tested against rigorous closed-world deductive reasoning challenges (AIME & Huma
 
 ```text
 decoupled-topological-coprocessing/
-├── README.md               # Project documentation and summary
+├── README.md               # Project documentation (English)
+├── README_ja.md            # Project documentation (Japanese)
+├── LICENSE                 # Apache License 2.0
+├── CITATION.cff            # Citation metadata
 ├── paper/
 │   ├── dtc_paper_en.pdf    # English Research Paper (Publication PDF)
 │   ├── dtc_paper_ja.pdf    # Japanese Research Paper (Publication PDF)
