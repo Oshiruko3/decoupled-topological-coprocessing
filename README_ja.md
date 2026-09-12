@@ -5,8 +5,10 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22726133.svg)](https://doi.org/10.5281/zenodo.22726133)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Paper: PDF (EN)](https://img.shields.io/badge/Paper-PDF%20(English)-blue.svg)](paper/dtc_paper_en.pdf)
-[![Paper: PDF (JA)](https://img.shields.io/badge/Paper-PDF%20(Japanese)-red.svg)](paper/dtc_paper_ja.pdf)
+[![DTC論文: PDF (EN)](https://img.shields.io/badge/DTC%E8%AB%96%E6%96%87-PDF%20(EN)-blue.svg)](paper/dtc_paper_en.pdf)
+[![DTC論文: PDF (JA)](https://img.shields.io/badge/DTC%E8%AB%96%E6%96%87-PDF%20(JA)-red.svg)](paper/dtc_paper_ja.pdf)
+[![DTS提案論文: PDF (EN)](https://img.shields.io/badge/DTS%E6%8F%90%E6%A1%88%E8%AB%96%E6%96%87-PDF%20(EN)-purple.svg)](paper/dts_position_paper_en.pdf)
+[![DTS提案論文: PDF (JA)](https://img.shields.io/badge/DTS%E6%8F%90%E6%A1%88%E8%AB%96%E6%96%87-PDF%20(JA)-orange.svg)](paper/dts_position_paper_ja.pdf)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 > **著者**: 松本 幸太 (Kouta Matsumoto) - 独立研究者  
@@ -72,10 +74,14 @@ decoupled-topological-coprocessing/
 ├── LICENSE                 # Apache License 2.0 (特許防衛条項付き)
 ├── CITATION.cff            # 学術引用メタデータ
 ├── paper/
-│   ├── dtc_paper_en.pdf    # 英語版 論文PDF (出版フォーマット)
-│   ├── dtc_paper_ja.pdf    # 日本語版 論文PDF (出版フォーマット)
-│   ├── paper_en.md         # 英語版 ポジションペーパー本文
-│   └── paper_ja.md         # 日本語版 ポジションペーパー本文
+│   ├── dtc_paper_en.pdf        # DTC 英語版 論文PDF (出版フォーマット)
+│   ├── dtc_paper_ja.pdf        # DTC 日本語版 論文PDF (出版フォーマット)
+│   ├── paper_en.md             # DTC 英語版 論文本文
+│   ├── paper_ja.md             # DTC 日本語版 論文本文
+│   ├── dts_position_paper_en.pdf # DTS 英語版 提案論文PDF (AI隔離脱出・アライメント)
+│   ├── dts_position_paper_ja.pdf # DTS 日本語版 提案論文PDF (AI隔離脱出・アライメント)
+│   ├── dts_position_paper_en.md  # DTS 英語版 提案論文本文
+│   └── dts_position_paper_ja.md  # DTS 日本語版 提案論文本文
 ├── src/
 │   ├── __init__.py         # パッケージエントリーポイント
 │   ├── core.py             # TopologicalCoprocessor & EpistemicState (State Both)

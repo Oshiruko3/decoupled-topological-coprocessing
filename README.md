@@ -5,8 +5,10 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22726133.svg)](https://doi.org/10.5281/zenodo.22726133)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Paper: PDF (EN)](https://img.shields.io/badge/Paper-PDF%20(English)-blue.svg)](paper/dtc_paper_en.pdf)
-[![Paper: PDF (JA)](https://img.shields.io/badge/Paper-PDF%20(Japanese)-red.svg)](paper/dtc_paper_ja.pdf)
+[![DTC Paper: PDF (EN)](https://img.shields.io/badge/DTC%20Paper-PDF%20(EN)-blue.svg)](paper/dtc_paper_en.pdf)
+[![DTC Paper: PDF (JA)](https://img.shields.io/badge/DTC%20Paper-PDF%20(JA)-red.svg)](paper/dtc_paper_ja.pdf)
+[![DTS Position Paper: PDF (EN)](https://img.shields.io/badge/DTS%20Position%20Paper-PDF%20(EN)-purple.svg)](paper/dts_position_paper_en.pdf)
+[![DTS Position Paper: PDF (JA)](https://img.shields.io/badge/DTS%20Position%20Paper-PDF%20(JA)-orange.svg)](paper/dts_position_paper_ja.pdf)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 > **Author**: Kouta Matsumoto (Independent Researcher)  
@@ -72,10 +74,14 @@ decoupled-topological-coprocessing/
 ├── LICENSE                 # Apache License 2.0
 ├── CITATION.cff            # Citation metadata
 ├── paper/
-│   ├── dtc_paper_en.pdf    # English Research Paper (Publication PDF)
-│   ├── dtc_paper_ja.pdf    # Japanese Research Paper (Publication PDF)
-│   ├── paper_en.md         # English Position Paper (Full text)
-│   └── paper_ja.md         # Japanese Position Paper (Master)
+│   ├── dtc_paper_en.pdf        # DTC English Research Paper (Publication PDF)
+│   ├── dtc_paper_ja.pdf        # DTC Japanese Research Paper (Publication PDF)
+│   ├── paper_en.md             # DTC English Master Paper
+│   ├── paper_ja.md             # DTC Japanese Master Paper
+│   ├── dts_position_paper_en.pdf # DTS English Position Paper (AI Containment)
+│   ├── dts_position_paper_ja.pdf # DTS Japanese Position Paper (AI Containment)
+│   ├── dts_position_paper_en.md  # DTS English Master Proposal
+│   └── dts_position_paper_ja.md  # DTS Japanese Master Proposal
 ├── src/
 │   ├── __init__.py         # Package entry point
 │   ├── core.py             # TopologicalCoprocessor & EpistemicState (State Both)
