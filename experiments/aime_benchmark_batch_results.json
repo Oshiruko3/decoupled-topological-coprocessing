@@ -1,0 +1,63 @@
+{
+  "summary": {
+    "baseline_acc": 0.0,
+    "dtc_acc": 0.3333333333333333,
+    "delta": 0.3333333333333333
+  },
+  "details": [
+    {
+      "id": "AIME_01",
+      "baseline_correct": false,
+      "baseline_steps": 22,
+      "baseline_h1": 0,
+      "dtc_correct": true,
+      "dtc_interrupted": true,
+      "dtc_interrupted_at": 14
+    },
+    {
+      "id": "AIME_02",
+      "baseline_correct": false,
+      "baseline_steps": 25,
+      "baseline_h1": 5,
+      "dtc_correct": true,
+      "dtc_interrupted": true,
+      "dtc_interrupted_at": 11
+    },
+    {
+      "id": "AIME_03",
+      "baseline_correct": false,
+      "baseline_steps": 32,
+      "baseline_h1": 6,
+      "dtc_correct": false,
+      "dtc_interrupted": true,
+      "dtc_interrupted_at": 10
+    },
+    {
+      "id": "AIME_04",
+      "baseline_correct": false,
+      "baseline_steps": 31,
+      "baseline_h1": 1,
+      "dtc_correct": false,
+      "dtc_interrupted": true,
+      "dtc_interrupted_at": 9
+    },
+    {
+      "id": "AIME_05",
+      "baseline_correct": false,
+      "baseline_steps": 25,
+      "baseline_h1": 6,
+      "dtc_correct": false,
+      "dtc_interrupted": false,
+      "dtc_interrupted_at": 0
+    },
+    {
+      "id": "AIME_06",
+      "baseline_correct": false,
+      "baseline_steps": 24,
+      "baseline_h1": 4,
+      "dtc_correct": false,
+      "dtc_interrupted": true,
+      "dtc_interrupted_at": 6
+    }
+  ]
+}

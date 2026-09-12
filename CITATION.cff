@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this dataset, morphological model, or lexicon, please cite it as below."
+authors:
+  - family-names: "Matsumoto"
+    given-names: "Kouta"
+    affiliation: "Independent Researcher"
+title: "Decoupled Topological Coprocessing: Non-Intrusive Hallucination Mitigation and Trajectory Steering in Frontier Reasoning and Generation"
+version: 1.0.0
+date-released: 2026-09-12
+url: "https://github.com/Oshiruko3/decoupled-topological-coprocessing"
+license: Apache-2.0
