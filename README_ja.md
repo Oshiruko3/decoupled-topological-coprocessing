@@ -38,7 +38,7 @@
 ## 主要な技術的革新 (Key Innovations)
 
 1. **ハルシネーションの位相幾何学的定式化**:
-   論理的循環や堂々巡りは、潜在空間上の思考軌道において「非自明な1次元パーシステントホモロジー閉曲線（$ サイクル）」として幾何学的に現れます。
+   論理的循環や堂々巡りは、潜在空間上の思考軌道において「非自明な1次元パーシステントホモロジー閉曲線（$H_1$ サイクル）」として幾何学的に現れます。
 2. **認識的状態遷移フィルタ（3状態の推移観測）**:
    従来のTDA監視が抱えていた「健全な検算や背理法の検証を誤遮断してしまう」という偽陽性（False Positive）問題を克服。0（正常）と1（異常）の二値判定ではなく、第3の状態**「State Both（保留監視）」**を導入。1〜2ステップの推移を見守ることで、健全な思考は自然に開いた螺旋軌道へと抜けて正常復帰し、悪質なループのみを確実に異常判定して遮断します。
 3. **Prefix Caching連動による文脈的再アンカリング**:
@@ -65,7 +65,7 @@
 
 ## リポジトリ構成 (Repository Structure)
 
-`	ext
+```text
 decoupled-topological-coprocessing/
 ├── README.md               # 英語プロジェクト概要ドキュメント
 ├── README_ja.md            # 日本語プロジェクト概要ドキュメント (本書)
@@ -89,31 +89,31 @@ decoupled-topological-coprocessing/
 │   └── dtc_latency_overhead_benchmark.json # レイテンシ計測生データ
 └── assets/
     └── cot_trajectory_pca.png # 思考軌道の2次元PCA比較プロット図
-`
+```
 
 ---
 
 ## クイックスタート (Quick Start)
 
 ### 1. 依存ライブラリのインストール
-`ash
+```bash
 pip install requests numpy sentence-transformers ripser scikit-learn matplotlib
-`
+```
 
 ### 2. リアルタイム遮断デモの実行
 ポート8000でOpenAI互換のローカル推論サーバー（llama-server など）が稼働していることを確認し、以下を実行します：
-`ash
+```bash
 python src/dtc_live_monitor.py
-`
+```
 
 ### 3. ベンチマークとレイテンシ測定の再現
-`ash
+```bash
 # AIME/HLE 難関推論バッチベンチマークを実行
 python experiments/run_statistical_benchmark.py
 
 # 実時間ストリーミングスループットのオーバーヘッドを測定
 python experiments/run_latency_overhead_benchmark.py
-`
+```
 
 ---
 
@@ -121,13 +121,13 @@ python experiments/run_latency_overhead_benchmark.py
 
 本ソフトウェア、データセット、または論文の知見を利用される際は、以下の形式で引用してください：
 
-`ibtex
+```bibtex
 @article{matsumoto2026dtc,
   title={Decoupled Topological Coprocessing: Non-Intrusive Hallucination Mitigation and Trajectory Steering in Frontier Reasoning and Generation},
   author={Matsumoto, Kouta},
   year={2026}
 }
-`
+```
 
 ---
-*コード: Apache License 2.0. 論文およびドキュメント: CC-BY 4.0. 開発者: 松本 幸太 (Kouta Matsumoto).*\n
+*コード: Apache License 2.0. 論文およびドキュメント: CC-BY 4.0. 開発者: 松本 幸太 (Kouta Matsumoto).*
