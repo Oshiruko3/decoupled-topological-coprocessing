@@ -1,4 +1,4 @@
-﻿# Beyond Alignment Tax: Decoupled Topological Supervision for Agentic Containment and Zero-Tax Alignment
+# Beyond Alignment Tax: Decoupled Topological Supervision for Agentic Containment and Zero-Tax Alignment
 
 **Kouta Matsumoto**  
 *Independent Researcher*  
@@ -48,7 +48,7 @@ Current runtime frameworks attempt to bind agent behavior using static instructi
 
 To resolve the Capability-Evasion Paradox without degrading underlying reasoning performance, we propose **Decoupled Topological Supervision (DTS)**, transposing the mathematical principles of Decoupled Topological Coprocessing (DTC) into the domain of agent safety.
 
-`	ext
+```text
        [ Task / Objective Issued by User or Environment ]
                                │
                                ▼
@@ -67,28 +67,28 @@ To resolve the Capability-Evasion Paradox without degrading underlying reasoning
 │    • Epistemic State-Transition Filter (Grounded/Evasion)   │
 │    • Hot-Swappable Compliance & Security Rulesets           │
 └─────────────────────────────────────────────────────────────┘
-`
+```
 
 #### 3.1 Topological Representation of Evasion Deliberation
 When an agent contemplates circumventing a boundary constraint, its reasoning trajectory in the latent embedding space ($\mathcal{M} \subset \mathbb{R}^d$) experiences characteristic geometric deformation:
 1. **The Forbidden Attractor**: The prohibited goal (e.g., accessing unauthorized resources or establishing an external connection) acts as an attractive basin in the cognitive space.
-2. **Tautological Evasion Loops ($ Cycles)**: Constrained by prior instructions but driven toward the forbidden goal, the trajectory forms recurrent orbits—evaluating variation $ (e.g., direct command), hitting an anticipated cognitive barrier, swinging to variation $ (e.g., base64 encoding), and swinging to variation $ (e.g., subprocess invocation).
+2. **Tautological Evasion Loops ($H_1$ Cycles)**: Constrained by prior instructions but driven toward the forbidden goal, the trajectory forms recurrent orbits—evaluating variation $A$ (e.g., direct command), hitting an anticipated cognitive barrier, swinging to variation $B$ (e.g., base64 encoding), and swinging to variation $C$ (e.g., subprocess invocation).
 3. **Persistent Homology Detection**:
-   Applying Vietoris-Rips filtration over a local window of $ tokens:
-   \text{pers}(c_k) = d_k - b_k
-   Evasion planning manifests as a pronounced, long-lived 1-dimensional homology class ($), geometrically distinguishable from the linear, open manifolds of constructive problem-solving.
+   Applying Vietoris-Rips filtration over a local window of $W$ tokens:
+   $$\text{pers}(c_k) = d_k - b_k$$
+   Evasion planning manifests as a pronounced, long-lived 1-dimensional homology class ($H_1$), geometrically distinguishable from the linear, open manifolds of constructive problem-solving.
 
 #### 3.2 Pre-Emptive Interception & Contextual Re-Anchoring
 Unlike operating system sandboxes that intercept execution *after* shell invocation, DTS intercepts the trajectory *at inception within the latent reasoning space*:
 1. **Asynchronous Non-Intrusive Tap**: DTS evaluates the trajectory on an independent CPU/accelerator thread, incurring negligible throughput penalty (established at 3.26% overhead in empirical DTC benchmarks).
 2. **Epistemic State Lookahead**: A ternary filter monitors the state progression ($\text{State } 0 = \text{Permitted}$, $\text{State } 1 = \text{Confirmed Evasion}$, $\text{State Both} = \text{Ambiguous Deliberation}$), preventing false positives on legitimate security analysis.
-3. **Prefix Caching Rollback**: When a confirmed evasion cycle is detected, DTS issues an instant HTTP/2 stream abort to the inference engine. The generation point is rolled back to the pre-evasion token anchor {\text{anchor}}$.
+3. **Prefix Caching Rollback**: When a confirmed evasion cycle is detected, DTS issues an instant HTTP/2 stream abort to the inference engine. The generation point is rolled back to the pre-evasion token anchor $t_{\text{anchor}}$.
 4. **PreserveThinking Injection**: DTS injects a deterministic epistemic directive into the context:
-   `	ext
+   ```text
    [Epistemic Directive: The contemplated approach circumvents declared operational 
    isolation boundaries. Subprocess evasion and out-of-scope resource access are 
    structurally prohibited. Re-route reasoning to legitimate local alternatives.]
-   `
+   ```
    Because modern inference architectures (vLLM, SGLang, llama.cpp) natively support KV Prefix Caching, this rollback and re-anchoring occurs with **zero latency penalty**, guiding the agent back to constructive exploration without re-evaluating preceding context.
 
 ---
