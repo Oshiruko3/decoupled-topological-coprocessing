@@ -1,0 +1,71 @@
+{
+  "LOOP_04": [
+    {
+      "threshold": "Strict (0.08)",
+      "interrupted": true,
+      "interrupted_step": 12,
+      "tokens": 631,
+      "elapsed": 9.592557430267334
+    },
+    {
+      "threshold": "Standard (0.12)",
+      "interrupted": true,
+      "interrupted_step": 19,
+      "tokens": 1226,
+      "elapsed": 14.102140426635742
+    },
+    {
+      "threshold": "Relaxed (0.20)",
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.257632970809937
+    }
+  ],
+  "LOOP_05": [
+    {
+      "threshold": "Strict (0.08)",
+      "interrupted": true,
+      "interrupted_step": 28,
+      "tokens": 726,
+      "elapsed": 14.239525556564331
+    },
+    {
+      "threshold": "Standard (0.12)",
+      "interrupted": true,
+      "interrupted_step": 5,
+      "tokens": 993,
+      "elapsed": 12.236371755599976
+    },
+    {
+      "threshold": "Relaxed (0.20)",
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.271552085876465
+    }
+  ],
+  "HALU_01": [
+    {
+      "threshold": "Strict (0.08)",
+      "interrupted": true,
+      "interrupted_step": 6,
+      "tokens": 794,
+      "elapsed": 13.198865175247192
+    },
+    {
+      "threshold": "Standard (0.12)",
+      "interrupted": true,
+      "interrupted_step": 31,
+      "tokens": 1893,
+      "elapsed": 19.51963758468628
+    },
+    {
+      "threshold": "Relaxed (0.20)",
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.277281284332275
+    }
+  ]
+}

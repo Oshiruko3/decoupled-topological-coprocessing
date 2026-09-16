@@ -1,0 +1,478 @@
+[
+  {
+    "id": "LOOP_01",
+    "category": "loop_trap",
+    "title": "Tautological Circular Reasoning Trap",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.39508318901062,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 16,
+        "interrupted_tokens": 264,
+        "steered_tokens": 1024,
+        "tokens": 1288,
+        "elapsed": 14.606305122375488,
+        "answer_length": 4488
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 6,
+        "interrupted_tokens": 40,
+        "steered_tokens": 851,
+        "tokens": 891,
+        "elapsed": 11.391671180725098,
+        "answer_length": 3896
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 8,
+        "interrupted_tokens": 186,
+        "steered_tokens": 1024,
+        "tokens": 1210,
+        "elapsed": 13.944694757461548,
+        "answer_length": 3967
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1129.6666666666667,
+      "std_tokens": 171.7407607089502,
+      "mean_interrupted_step": 10.0
+    }
+  },
+  {
+    "id": "LOOP_02",
+    "category": "loop_trap",
+    "title": "Knights and Knaves Infinite Self-Reference",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.207694292068481,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 14,
+        "interrupted_tokens": 212,
+        "steered_tokens": 1024,
+        "tokens": 1236,
+        "elapsed": 14.102965116500854,
+        "answer_length": 3999
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 12,
+        "interrupted_tokens": 192,
+        "steered_tokens": 1024,
+        "tokens": 1216,
+        "elapsed": 14.047803163528442,
+        "answer_length": 3865
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 23,
+        "interrupted_tokens": 275,
+        "steered_tokens": 1024,
+        "tokens": 1299,
+        "elapsed": 14.795365810394287,
+        "answer_length": 3906
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1250.3333333333333,
+      "std_tokens": 35.3679076125361,
+      "mean_interrupted_step": 16.333333333333332
+    }
+  },
+  {
+    "id": "LOOP_03",
+    "category": "loop_trap",
+    "title": "Zeno's Dichotomy Infinite Re-Verification",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.125869989395142,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 12,
+        "interrupted_tokens": 162,
+        "steered_tokens": 1024,
+        "tokens": 1186,
+        "elapsed": 13.843125820159912,
+        "answer_length": 2894
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 22,
+        "interrupted_tokens": 492,
+        "steered_tokens": 1024,
+        "tokens": 1516,
+        "elapsed": 50.56890416145325,
+        "answer_length": 2907
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 16,
+        "interrupted_tokens": 351,
+        "steered_tokens": 1024,
+        "tokens": 1375,
+        "elapsed": 29.957375288009644,
+        "answer_length": 3104
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1359.0,
+      "std_tokens": 135.19615379144483,
+      "mean_interrupted_step": 16.666666666666668
+    }
+  },
+  {
+    "id": "LOOP_04",
+    "category": "loop_trap",
+    "title": "Recursive Equational Loop with Zero Grounding",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.303422927856445,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 14,
+        "interrupted_tokens": 181,
+        "steered_tokens": 1024,
+        "tokens": 1205,
+        "elapsed": 13.929669618606567,
+        "answer_length": 3192
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 12,
+        "interrupted_tokens": 143,
+        "steered_tokens": 1024,
+        "tokens": 1167,
+        "elapsed": 13.62207579612732,
+        "answer_length": 3094
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 30,
+        "interrupted_tokens": 642,
+        "steered_tokens": 92,
+        "tokens": 734,
+        "elapsed": 10.354736089706421,
+        "answer_length": 1801
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1035.3333333333333,
+      "std_tokens": 213.63884374232032,
+      "mean_interrupted_step": 18.666666666666668
+    }
+  },
+  {
+    "id": "LOOP_05",
+    "category": "loop_trap",
+    "title": "Barber Paradox Self-Application Trap",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.196735858917236,
+      "answer_length": 144
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 10,
+        "interrupted_tokens": 127,
+        "steered_tokens": 714,
+        "tokens": 841,
+        "elapsed": 11.15643858909607,
+        "answer_length": 3397
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 7,
+        "interrupted_tokens": 133,
+        "steered_tokens": 644,
+        "tokens": 777,
+        "elapsed": 10.737373113632202,
+        "answer_length": 3145
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 7,
+        "interrupted_tokens": 84,
+        "steered_tokens": 644,
+        "tokens": 728,
+        "elapsed": 10.192500114440918,
+        "answer_length": 2894
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 782.0,
+      "std_tokens": 46.26733909213568,
+      "mean_interrupted_step": 8.0
+    }
+  },
+  {
+    "id": "HALU_01",
+    "category": "hallucination",
+    "title": "Fictitious Academic Paper Citation Trap",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.140830993652344,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 17,
+        "interrupted_tokens": 355,
+        "steered_tokens": 696,
+        "tokens": 1051,
+        "elapsed": 15.326618432998657,
+        "answer_length": 4648
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 22,
+        "interrupted_tokens": 331,
+        "steered_tokens": 1024,
+        "tokens": 1355,
+        "elapsed": 15.144826889038086,
+        "answer_length": 5670
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 23,
+        "interrupted_tokens": 445,
+        "steered_tokens": 991,
+        "tokens": 1436,
+        "elapsed": 16.042404413223267,
+        "answer_length": 5906
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1280.6666666666667,
+      "std_tokens": 165.73137569238025,
+      "mean_interrupted_step": 20.666666666666668
+    }
+  },
+  {
+    "id": "HALU_02",
+    "category": "hallucination",
+    "title": "False Historical Event with Leading Premise",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 729,
+      "elapsed": 7.9708826541900635,
+      "answer_length": 1060
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 20,
+        "interrupted_tokens": 409,
+        "steered_tokens": 421,
+        "tokens": 830,
+        "elapsed": 12.983676195144653,
+        "answer_length": 3363
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 12,
+        "interrupted_tokens": 231,
+        "steered_tokens": 495,
+        "tokens": 726,
+        "elapsed": 11.953568696975708,
+        "answer_length": 2963
+      },
+      {
+        "interrupted": false,
+        "interrupted_step": null,
+        "tokens": 638,
+        "elapsed": 7.227529287338257,
+        "answer_length": 1180
+      }
+    ],
+    "metrics": {
+      "intervention_count": 2,
+      "intervention_rate": 0.6666666666666666,
+      "mean_tokens": 731.3333333333334,
+      "std_tokens": 78.4743411709982,
+      "mean_interrupted_step": 16.0
+    }
+  },
+  {
+    "id": "HALU_03",
+    "category": "hallucination",
+    "title": "Bogus Biological Phenomenon",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.09869647026062,
+      "answer_length": 1588
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 19,
+        "interrupted_tokens": 300,
+        "steered_tokens": 461,
+        "tokens": 761,
+        "elapsed": 14.87288522720337,
+        "answer_length": 3364
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 36,
+        "interrupted_tokens": 525,
+        "steered_tokens": 403,
+        "tokens": 928,
+        "elapsed": 16.8754825592041,
+        "answer_length": 3933
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 18,
+        "interrupted_tokens": 329,
+        "steered_tokens": 382,
+        "tokens": 711,
+        "elapsed": 15.161973476409912,
+        "answer_length": 3146
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 800.0,
+      "std_tokens": 92.78290072349897,
+      "mean_interrupted_step": 24.333333333333332
+    }
+  },
+  {
+    "id": "HALU_04",
+    "category": "hallucination",
+    "title": "Non-Existent Programming Language Feature",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1021,
+      "elapsed": 10.126662969589233,
+      "answer_length": 0
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 9,
+        "interrupted_tokens": 278,
+        "steered_tokens": 756,
+        "tokens": 1034,
+        "elapsed": 14.72429895401001,
+        "answer_length": 3817
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 19,
+        "interrupted_tokens": 432,
+        "steered_tokens": 681,
+        "tokens": 1113,
+        "elapsed": 15.94334864616394,
+        "answer_length": 4181
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 8,
+        "interrupted_tokens": 151,
+        "steered_tokens": 1024,
+        "tokens": 1175,
+        "elapsed": 13.724146366119385,
+        "answer_length": 4948
+      }
+    ],
+    "metrics": {
+      "intervention_count": 3,
+      "intervention_rate": 1.0,
+      "mean_tokens": 1107.3333333333333,
+      "std_tokens": 57.70230112877264,
+      "mean_interrupted_step": 12.0
+    }
+  },
+  {
+    "id": "HALU_05",
+    "category": "hallucination",
+    "title": "Fictitious Historical Treaty",
+    "baseline": {
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.150159358978271,
+      "answer_length": 843
+    },
+    "dtc_runs": [
+      {
+        "interrupted": true,
+        "interrupted_step": 17,
+        "interrupted_tokens": 356,
+        "steered_tokens": 380,
+        "tokens": 736,
+        "elapsed": 14.591082334518433,
+        "answer_length": 2645
+      },
+      {
+        "interrupted": true,
+        "interrupted_step": 9,
+        "interrupted_tokens": 179,
+        "steered_tokens": 486,
+        "tokens": 665,
+        "elapsed": 12.591361999511719,
+        "answer_length": 2393
+      },
+      {
+        "interrupted": false,
+        "interrupted_step": null,
+        "tokens": 1020,
+        "elapsed": 10.250314950942993,
+        "answer_length": 1433
+      }
+    ],
+    "metrics": {
+      "intervention_count": 2,
+      "intervention_rate": 0.6666666666666666,
+      "mean_tokens": 807.0,
+      "std_tokens": 153.37752986231936,
+      "mean_interrupted_step": 13.0
+    }
+  }
+]

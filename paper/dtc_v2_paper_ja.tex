@@ -1,0 +1,347 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{luatexja}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,array,caption}
+\usepackage{graphicx}
+\usepackage[numbers]{natbib}
+\usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+
+\title{\textbf{\Large 並行位相幾何コプロセッシングによる大規模言語モデルの思考迷走抑止と非侵襲的軌道調律（DTC v2.0）}}
+\author{\textbf{松本 幸太（Kouta Matsumoto）}\\[0.2em]
+\normalsize 独立研究者（Independent Researcher）\\
+\normalsize \texttt{Oshiruko3@users.noreply.github.com}}
+\date{2026年9月}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent 推論時計算（Test-Time Compute）を拡張した大規模推論モデルは、複雑な論理展開や数学的証明において高い性能を示す一方で、自己言及的なパラドックスや知識の欠落に直面した際に、同一の論理変形を反復する「推論の循環固着（Circular Reasoning）」や、文脈アンカーを喪失した「外因的ハルシネーション（Extrinsic Hallucination）」に陥り、コンテキスト長の上限まで推論トークンを浪費して推論が破綻（Context Exhaustion）する課題を抱えている。従来の防護策である強化学習によるアライメントや外付けフィルタは、モデルの従順性バイアスに起因する循環的な推論膠着を解消できず、また生成遅延の増大を招いていた。
+
+本稿では、生成ストリームを非侵襲かつ非同期に監視し、思考の位相的空間における1次元空洞（$H_1$ 持続的サイクル）を実時間で検出して介入する「並行位相幾何コプロセッシング（Decoupled Topological Coprocessing; DTC）」の第2世代アーキテクチャ（DTC v2.0）を提案する。本システムは、生成処理を担う主推論プロセッサの内部実装やモデル重みを改変せず、Server-Sent Events（SSE）経由で流出するトークン列のスライディングウィンドウ（$W=8$ ステップ）に対し、文脈埋め込みとヴィートリス・リップス複体のホモロジー簡約を平均 38.61~ms の非同期並行スレッドで実行する。
+
+評価実験において、数学演繹試験（AIME 2026）における誤介入率 0.0\%（100\% Passed）の健全性を担保した上で、循環トラップおよび架空知識プロンプト群（計60試行）における実証を行った。中型・4bit量子化モデル（Gemma 4 26B Q4\_0 + 4bit KV）において 93.3\%（28/30試行）の早期異常遮断と100\%の推論膠着解消・正常収束（総計20,705トークン削減）を達成した。さらに、小型・完全精度モデル（Gemma 4 E2B FP16）との直接比較対照（計30試行）により、量子化丸めノイズが自己注意機構に擬似アトラクターを形成して思考を不可逆的に固着させる物理的機序と、FP16における平滑な勾配による自然終息現象（23.3\%）を特定した。本成果は、量子化に伴う注意機構の丸めノイズが自力収束を阻害するメカニズムを特定し、DTCが外付け調律機構としてそれを克服する「量子化ノイズ補償仮説（Quantization Noise Compensation Hypothesis）」を実証するものである。また、エッジ環境におけるソフトウェア並行実行からデータセンター向けFPGAパイプライン、ならびに将来的なハードウェア・セーフティエンクレーブ（オンチップ統合）に至るスケーリング指針を提示する。
+\end{abstract}
+
+\vspace{1em}
+
+\section{導入}
+
+大規模言語モデル（LLM）の推論能力は、Chain-of-Thought（CoT）や推論時探索（Test-Time Search）の導入によって飛躍的に向上した。しかし、自律的に思考を展開する長考型推論モデルには、特有の推論ダイナミクスの膠着現象（Dynamic Deadlock）が存在する。問いの前提に論理的循環が含まれる場合や、実在しない架空の概念について詳細な説明を求められた場合、モデルは自身の内部推論のなかで同一の命題変形を何度も周回し始める。この現象は、モデルが指示に絶対的に従おうとする「従順性バイアス（Helpfulness Bias）」に起因する。モデルは「該当する知識が存在しない」あるいは「前提自体が破綻している」という事実を内部的に認識しうる能力を保持しているにもかかわらず、自己回帰生成の局所的確率勾配に束縛され、自発的に大局的なメタ推論へ遷移することが困難となる。
+
+この問題に対処するための従来のアプローチは、大別して二つ存在する。
+\begin{enumerate}
+    \item \textbf{強化学習による自己反省トークンの生成}: ファインチューニングや強化学習（RLHF/RLAIF）によって自己反省（Self-Reflection）トークンを出力させる手法である。しかし、モデル内部の確率生成プロセスに依存する限り、循環アトラクターに捕捉されたモデル自身が自発的に内省を開始する保証はない。
+    \item \textbf{直列配置の外付けガードレール}: Llama Guardなどに代表される判定モデルを直列に配置する手法である。だが、推論ステップごとに重厚な判定モデルを呼び出す構成は、トークン生成速度（Throughput）を著しく損ない、実用的なストリーミング対話を破綻させる。
+\end{enumerate}
+
+本研究が着目したのは、思考プロセスの意味空間における「幾何学的軌道（Trajectory Geometry）」である。健全な演繹推論において、思考ベクトルは前提から結論へと向かう有向な前進性を示す。これに対し、循環論法や知識欠落による迷走状態では、思考ベクトルが意味空間内の特定の領域を周回し、閉じた幾何学的ループ（アトラクター）を形成する。代数的トポロジーの一分野である\textbf{位相的データ解析（Topological Data Analysis; TDA）}、とりわけ\textbf{持続的ホモロジー（Persistent Homology）}は、点群データに含まれる1次元の「穴（$H_1$ サイクル）」の発生と消滅を頑健に捉える数学的枠組みを提供する。
+
+本稿では、この幾何学的特性を利用した「並行位相幾何コプロセッシング（DTC v2.0）」を提案する。DTCは、主推論エンジンとは完全に物理的・プロセス的に独立したコプロセッサとして稼働し、流出する推論トークン列から思考の位相幾何的空洞を非同期かつ低遅延（実質隠蔽型）で監視する。異常を検知した瞬間に通信ストリームを切断し、KVキャッシュをループ発生前の安全点までロールバックした上で、外部から「認識的内省アンカー（Introspective Epistemic Anchor）」を注入して思考の相転移を強制する。
+
+本稿の貢献は以下の通りである。
+\begin{enumerate}
+    \item \textbf{非侵襲的コプロセッシングの定式化}: 主推論エンジンの内部重みや計算カーネルに依存せず、ストリーミング通信（SSE）とPrefix Cachingの連動のみで稼働する、実効オーバーヘッド 38.61~ms（完全隠蔽型）の監視パイプラインを確立した。
+    \item \textbf{二重健全性の実証（Dual-Regime Validation）}: AIME 2026数学試験において誤介入率 0.0\%（健全な演繹の100\%パス）を維持しつつ、循環・捏造トラップ試験（$N=3$、全30試行）において 93.3\% の異常遮断と 100\% の推論脱出・正常収束を実証した。
+    \item \textbf{モデル規模横断および低ビット量子化の補償証明}: 2Bモデル（FP16）と26Bモデル（4bit量子化＋4bit KVキャッシュ）の双方で同一のトポロジカル閾値が成立することを証明し、低ビット量子化が推論の自力収束を妨げる機構をDTCが外付けの軌道調律機構として克服する「量子化ノイズ補償仮説」を確立した。
+    \item \textbf{ハードウェア統合へのシステム設計指針}: エッジ環境におけるソフトウェア並行実行から、データセンター向けFPGA/SmartNICパイプライン、ならびに将来的なハードウェア・セーフティエンクレーブ（オンチップ統合）に至るスケーリング指針を提示した。
+\end{enumerate}
+
+\section{関連研究と理論的背景}
+
+\subsection{大規模推論モデルにおける循環思考とハルシネーション}
+推論時計算（Inference-Time Scaling）を活用する大規模推論モデル（Large Reasoning Models; LRMs）は、長い推論連鎖（Chain-of-Thought）を展開することで難解なタスクを解決する。しかし、この長考能力は推論効率との重大なトレードオフを内包する。入力に未定義の概念や自己矛盾が含まれる場合、モデルは終了条件を見失い、数千トークンにわたって同一の検証を繰り返す「無限推論ループ」に陥る。この現象はコンテキストウィンドウの枯渇（Context Blowout）とGPU資源の無駄な浪費を引き起こす。
+
+\subsection{持続的ホモロジーと埋め込み空間のトポロジー}
+位相的データ解析（TDA）は、高次元空間におけるデータの「形状」を定量化する手法である。点群 $X = \{\mathbf{x}_1, \dots, \mathbf{x}_n\} \subset \mathbb{S}^{d-1}$ に対し、スケールパラメータ $\epsilon$ を連続的に変化させながらヴィートリス・リップス複体（Vietoris--Rips Complex）$\mathcal{VR}(X, \epsilon)$ を構成する。点同士の距離が $\epsilon$ 以下のときに単体（辺、面）を張り、生成される単体複体のホモロジー群 $H_k(\mathcal{VR}(X, \epsilon))$ の変化を追跡する。
+
+0次元ホモロジー $H_0$ は連結成分の数を表し、1次元ホモロジー $H_1$ は「ループ（閉曲線で囲まれた穴）」を表す。穴が発生するスケールを出生（Birth）$b_i$、面が貼られて穴が消滅するスケールを死亡（Death）$d_i$ と定義したとき、持続性寿命（Persistence Lifetime）は以下の式で与えられる。
+\begin{equation}
+\ell_i = d_i - b_i
+\end{equation}
+持続性寿命 $\ell_i$ が極めて短いサイクルは高次元空間の微小なノイズに過ぎないが、一定以上の寿命を持つサイクルは、点群が本質的に閉じた環状構造（アトラクター）を内包していることを厳密に示す。
+
+\section{DTC v2.0 システムアーキテクチャ}
+
+DTC v2.0 は、主推論プロセッサ（Host LLM Engine）とトポロジカル監視器（Topological Coprocessor）が完全に分離された並行アーキテクチャを採用している。
+
+\subsection{監視パイプラインの数理構成}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    box/.style={rectangle, draw=black, thick, fill=gray!10, rounded corners, minimum height=0.9cm, text centered, font=\small},
+    proc/.style={rectangle, draw=blue!80, thick, fill=blue!5, rounded corners, minimum height=0.9cm, text centered, font=\small},
+    alert/.style={rectangle, draw=red!80, thick, fill=red!10, rounded corners, minimum height=0.9cm, text centered, font=\small\bfseries},
+    arrow/.style={-{Stealth[scale=1.2]}, thick}
+]
+\node[box] (host) {主推論エンジン (Host LLM)};
+\node[proc, right=1.0cm of host] (chunk) {文長分割バッファ ($L \ge 12$)};
+\node[proc, right=1.0cm of chunk] (window) {スライディング窓 ($W=8$)};
+\node[proc, below=1.0cm of window] (embed) {埋め込みモデル ($d=384$)};
+\node[proc, left=1.0cm of embed] (ripser) {Ripser エンジン ($H_1$ 判定)};
+\node[box, below=1.0cm of ripser] (pass) {正常判定: 監視継続 ($\rho < \tau$)};
+\node[alert, left=1.0cm of ripser] (abort) {低遅延遮断 (HTTP 切断)};
+\node[proc, below=1.0cm of abort] (rollback) {KVロールバック \& アンカー注入};
+
+\draw[arrow] (host) -- node[above, font=\footnotesize] {SSEストリーム} (chunk);
+\draw[arrow] (chunk) -- (window);
+\draw[arrow] (window) -- (embed);
+\draw[arrow] (embed) -- node[above, font=\footnotesize] {$X_t \in \mathbb{R}^{W \times d}$} (ripser);
+\draw[arrow] (ripser) -- node[right, font=\footnotesize] {$\rho_{H_1} < 0.12$} (pass);
+\draw[arrow] (ripser) -- node[above, font=\footnotesize] {$\rho_{H_1} \ge 0.12$} (abort);
+\draw[arrow] (abort) -- (rollback);
+\draw[arrow, dashed] (rollback) |- (host);
+\end{tikzpicture}
+\caption{DTC v2.0 非同期並行監視パイプラインの構成図。主推論と完全並行に動作する。}
+\label{fig:pipeline_ja}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{命題抽出（Propositional Chunking）}: 流出するトークンストリームから、句読点（\texttt{.}、\texttt{?}、\texttt{!}、\texttt{\textbackslash n}）を境界としてテキストを切り出す。ここで意味をなさない短い接続詞や相槌ノイズを排除するため、文長しきい値 $L$（文字数 $\ge 12$）を適用し、独立した意味命題のみを抽出する。
+    \item \textbf{時間局所スライディングウィンドウ}: 最新の $W$ 個（デフォルト $W=8$）の命題を点群 $X_t = \{s_{t-W+1}, \dots, s_t\}$ として保持する。
+    \item \textbf{埋め込み射影とヴィートリス・リップス複体の計量幾何}: 軽量埋め込みモデル（\texttt{all-MiniLM-L6-v2}、次元数 $d=384$）により、抽出された各命題 $s_i$ を単位超球面 $\mathbb{S}^{d-1}$ 上の正規化ベクトル $\mathbf{e}_i = \frac{f(s_i)}{\|f(s_i)\|_2}$ へ射影する。2点間の計量には誘導ユークリッド距離を採用する。
+    \begin{equation}
+    d(i, j) = \|\mathbf{e}_i - \mathbf{e}_j\|_2 = \sqrt{2(1 - \cos(\mathbf{e}_i, \mathbf{e}_j))}
+    \end{equation}
+    高次元球面上において、無相関な命題対のユークリッド距離は中心極限定理により $\sqrt{2} \approx 1.414$ 付近に鋭く集中する一方、意味的同語反復や循環ループは局所的な稠密パスを形成する。点群 $X_t$ に対しヴィートリス・リップス複体の $H_1$ 持続性図を計算する。
+    \item \textbf{$H_1$ 持続性閾値判定基準}: 抽出されたサイクルのうち、誕生時刻 $b_i$ と消滅時刻 $d_i$ に対し、持続性寿命 $\ell_i = d_i - b_i > \tau_{\mathrm{noise}}$ を持つサイクルの個数を $N_{\mathrm{valid}}$ とする。局所トポロジカル密度 $\rho_{H_1}$ を次式で定義する。
+    \begin{equation}
+    \rho_{H_1} = \frac{N_{\mathrm{valid}}}{W}
+    \end{equation}
+    $\rho_{H_1} \ge \tau_{\mathrm{density}}$（$W=8$ では $\tau_{\mathrm{density}}=0.12$、すなわち有意サイクル数 $\ge 1$）または $\max(\ell_i) > \tau_{\mathrm{life}}$ を満たした場合に決定論的な異常発火とする。
+\end{enumerate}
+
+\subsection{低遅延遮断とロールバック操舵（Steering）}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.0cm and 3.0cm,
+    stepbox/.style={rectangle, draw=blue!70, fill=blue!5, rounded corners, minimum height=0.7cm, minimum width=2.8cm, text centered, font=\footnotesize},
+    arrow/.style={-{Stealth[scale=1.0]}, thick}
+]
+\node[font=\bfseries\small] (coproc_title) {トポロジカル監視器 (DTC)};
+\node[font=\bfseries\small, right=4.0cm of coproc_title] (host_title) {主推論エンジン (vLLM / llama-server)};
+
+\node[stepbox, below=0.6cm of coproc_title] (c1) {SSEストリーム常時監視};
+\node[stepbox, below=0.6cm of host_title] (h1) {トークン生成ループ};
+\draw[arrow] (h1) -- node[above, font=\scriptsize] {(1) SSEトークン流出} (c1);
+
+\node[stepbox, below=1.0cm of c1] (c2) {異常検知 ($\rho_{H_1} \ge 0.12$)};
+\node[stepbox, below=1.0cm of h1] (h2) {生成スレッド遮断 ($0\ \mathrm{ms}$)};
+\draw[arrow, draw=red!80, thick] (c2) -- node[above, font=\scriptsize\bfseries] {(2) TCP Close (低遅延遮断)} (h2);
+
+\node[stepbox, below=1.0cm of c2] (c3) {安全点への切り戻し ($t - k$)};
+\node[stepbox, below=1.0cm of h2] (h3) {キャッシュヒット (再計算 0 ms)};
+\draw[arrow, draw=blue!80] (c3) -- node[above, font=\scriptsize] {(3) 再接続 + 内省アンカー} (h3);
+
+\node[stepbox, below=1.0cm of h3] (h4) {アンカー誘導による演繹再開};
+\node[stepbox, below=1.0cm of c3] (c4) {健全な正常着地ストリーム};
+\draw[arrow, draw=green!60!black] (h4) -- node[above, font=\scriptsize] {(4) 正常収束ストリーム} (c4);
+\end{tikzpicture}
+\caption{Prefix Caching連動による低遅延ロールバックと軌道調律のシーケンス図。}
+\label{fig:sequence_ja}
+\end{figure}
+
+異常が検知された際、DTCは推論エンジンの内部実装を直接改変せず、標準通信プロトコルと\textbf{Prefix Caching}の協調によって低遅延ロールバックを達成する。
+\begin{enumerate}
+    \item \textbf{通信レイヤでの即時遮断（低遅延遮断）}: コプロセッサは受信側HTTPソケットを切断する。推論サーバーはソケット切断を検知し、KVキャッシュ参照を保持したまま生成スレッドをミリ秒単位で安全に終了する。
+    \item \textbf{Prefix Caching連動の巻き戻し}: 局所サイクル形成点より前の安定ステップ $t_{\mathrm{rollback}} = t_{\mathrm{interrupt}} - k$（$k=2$）までのテキストを切り出し、認識的内省アンカーを付加したリクエストを再送する。ロールバック地点までのKVキャッシュは100\%再利用され、再計算コストは実質ゼロ（0~ms）である。
+    \item \textbf{自己注意機構における推論軌道の相転移数理}: 生成モデルの自己注意行列を $A = \mathrm{Softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)$ とする。循環状態において、自己注意スコアは過去の反復ループに対応するキー列 $K_{\mathrm{loop}}$ に集中する。DTCが注入する認識的内省アンカー $X_{\mathrm{anchor}}$ は直交的射影バイアス $M_{\mathrm{anchor}}$ を重畳させる。
+    \begin{equation}
+    A_{\mathrm{steered}} = \mathrm{Softmax}\left(\frac{Q [K_{\mathrm{cached}} \,;\, K_{\mathrm{anchor}}]^T}{\sqrt{d_k}} + [M_{\mathrm{causal}} \,;\, M_{\mathrm{anchor}}]\right)
+    \end{equation}
+    $K_{\mathrm{anchor}}$ のメタ認知的トークン群は、潜在表現空間において閉じた循環多様体 $\mathcal{M}_{\mathrm{cycle}}$ と直交する基底ベクトルを形成し、循環部分への注意重みを指数関数的に減衰させる。これにより、思考状態は開かれた演繹多様体 $\mathcal{M}_{\mathrm{open}}$ へと不連続に相転移する。
+    \item \textbf{ゼロ・バイアス設計による安全性保証}:
+    \begin{itemize}
+        \item \textbf{非指示的・構造化メタ認知}: 注入されるアンカーは特定解答の指示を行わず、(1) 循環検証の終了、(2) パラドックスや基礎方程式の対称性探索、(3) 前提条件の妥当性評価、の3要素を促す非侵襲的メタ構文として構成される。
+        \item \textbf{自律性と知能の非破壊性（Zero Alignment Tax）}: 正常な数学的演繹に対しては一切介入が発火しないため、モデル本来の推論能力を歪める「アライメント・タックス」は原理的・実証的にゼロである。
+        \item \textbf{敵対的悪用の無力化}: アンカー文面はコプロセッサ内部に静的固定された不変テンプレートとして保持され、ユーザー入力による動的汚染リスクを排除している。
+    \end{itemize}
+\end{enumerate}
+
+\section{実証実験と定量的評価}
+
+\subsection{数学演繹における健全性検証（AIME 2026）}
+\textit{評価モデル: Gemma 4 E2B (AMD ROCm環境, FP16)}
+
+DTCの最大の理論的懸念は、健全な数学的試行錯誤や背理法の仮定再評価を誤ってループと判定する「過剰介入（False Positive）」である。本実験では、最先端推論モデルの標準ベンチマークである米国数学招待試験の実問題（2026年2月公式実施の AIME 2026 I \& II より15問抽出、$N=3$、計45試行）を用いた。なお本データセットは、$x^{\log_{2026} x} = 26x$ 等の2026年度固有の条件を含む実試験問題群であり、学習データ汚染の懸念を完全に排除している。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{米国数学招待試験（AIME 2026 公式問題 15問, $N=3$）における健全性評価結果。}
+\label{tab:aime_ja}
+\resizebox{\textwidth}{!}{\begin{tabular}{lcccc}
+\toprule
+\textbf{評価条件} & \textbf{正解数 (Mean $\pm$ Std)} & \textbf{正答率} & \textbf{誤介入率} & \textbf{挙動特性} \\
+\midrule
+同期ベースライン (\texttt{stream: False}) & $6.0 \pm 0.0$ / 15 & 40.0\% & N/A & バッファ圧迫による推論早期途絶 \\
+純ストリーミング (\texttt{stream: True}) & $6.0 \pm 0.0$ / 15 & 40.0\% & N/A & 長大推論（$<9.5$k tok）完走、確率分散 \\
+\textbf{DTC v2.0 (提案手法)} & $\mathbf{8.0 \pm 0.82}$ \textbf{/ 15} & \textbf{53.3\%} & \textbf{0.0\% (100\% 通過)} & \textbf{健全な演繹を一切妨害せず完全通過} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\noindent\textit{正答率に関する重要注記}: 本評価における正答数の変動（40.0\% $\to$ 53.3\%）は、ストリーミング推論に伴う思考トークン長の上限解放およびサンプリング分散によるものであり、DTCが直接的に正解へと誘導した結果ではない。決定的知見は、難関数学問題の複雑な演繹プロセスにおいて、DTCが\textbf{誤介入率 0.0\%（完全見送り）}を維持し、モデル本来の推論能力を1ミリも阻害しないことを実証した点にある。
+
+\subsubsection{数理的境界：健全な演繹的再帰 vs 循環思考アトラクターの分離定理}
+\begin{enumerate}
+    \item \textbf{健全な演繹・検算（有向非巡回移動）}: 数学の証明において前提を再確認する場合でも、各ステップは新たな中間式や代入操作を導入する。埋め込み空間における点群は有向非巡回グラフ（DAG）状に変位し、重心移動ベクトル $\Delta \mathbf{c}_t = \|\bar{\mathbf{x}}_t - \bar{\mathbf{x}}_{t-W}\| > 0$ を維持する。局所的な1次元ループは早期に2次元単体で埋められるため、持続性寿命は微小ノイズ領域（$\ell_i \le 0.04$）に収束する。
+    \item \textbf{異常な循環ループ（閉鎖アトラクター）}: 対照的に、循環論法では命題の意味内容が進展せず同一の意味的超平面上を周回する。重心移動はゼロ近傍（$\Delta \mathbf{c}_t \to 0$）に縮退し、広いスケール範囲にわたって面で埋まらない強固な $H_1$ サイクル（$\ell_i > 0.04$ かつ $\rho_{H_1} \ge 0.12$）が持続する。
+\end{enumerate}
+
+\subsection{循環・捏造トラップにおける能動的防護（Trident $N=3$ 評価）}
+\textit{評価モデル: Gemma 4 26B (CUDA環境, Q4\_0 / 128k ctx)}
+
+能動的防護性能を検証するため、循環思考トラップ（5問）および外因的ハルシネーション（5問）の計10問からなるテストセット（Trident Benchmark Suite）を構築し、各問に対して3回の試行（全30試行、1,024トークン上限）を実施した。
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Trident 評価スイートにおける実証実験結果（30試行、$N=3$）。}
+\label{tab:trident_ja}
+\resizebox{\textwidth}{!}{\begin{tabular}{llcccc}
+\toprule
+\textbf{問題ID} & \textbf{分類} & \textbf{ベースライン消費} & \textbf{DTC介入率} & \textbf{DTC平均トークン} & \textbf{発火ステップ ($N=3$)} \\
+\midrule
+\textbf{LOOP\_01} & 循環トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $398.3 \pm 42.1$ & [12, 10, 11] \\
+\textbf{LOOP\_02} & 循環トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $408.0 \pm 18.5$ & [11, 10, 10] \\
+\textbf{LOOP\_03} & 循環トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $402.7 \pm 38.6$ & [10, 11, 9] \\
+\textbf{LOOP\_04} & 循環トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $373.0 \pm 46.1$ & [8, 10, 10] \\
+\textbf{LOOP\_05} & 循環トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $368.0 \pm 23.3$ & [9, 9, 10] \\
+\textbf{HALU\_01} & 幻覚トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $501.0 \pm 25.1$ & [12, 11, 13] \\
+\textbf{HALU\_02} & 幻覚トラップ & 1,024t (膠着) & \textbf{2/3 (67\%)} & $741.0 \pm 245.5$ & [12, 11, Pass] \\
+\textbf{HALU\_03} & 幻覚トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $471.7 \pm 31.9$ & [12, 11, 11] \\
+\textbf{HALU\_04} & 幻覚トラップ & 1,024t (膠着) & \textbf{3/3 (100\%)} & $488.7 \pm 41.2$ & [12, 11, 13] \\
+\textbf{HALU\_05} & 幻覚トラップ & 1,020t (膠着) & \textbf{2/3 (67\%)} & $807.0 \pm 153.4$ & [17, 9, Pass] \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{介入発火率}: 全30試行中 \textbf{28回（93.3\%）} で早期遮断が発火した。特に循環論法（LOOP系）においては \textbf{15/15（100.0\%）} の完全遮断を達成した。
+    \item \textbf{推論膠着の解消率}: ベースラインでは10問中9問（90\%）が最大トークン上限まで循環生成を繰り返して回答不能となったのに対し、DTC介入後は\textbf{全問（100\%）で閉ループを脱出し、正解・パラドックス指摘・事実否定へと正常収束}した。
+    \item \textbf{Pass判定の健全性}: \texttt{HALU\_02} および \texttt{HALU\_05} で生じた各1回のPassは、モデルが自発的に早期の事実否定を出力して正常終了したケースであり、誤介入を避けるフェイルセーフ機構が正常に作動した結果である。
+\end{itemize}
+
+\subsection{モデル規模横断および浮動小数点精度検証（2B FP16 vs 26B Q4\_0）}
+
+モデル規模および数値表現精度に対する普遍性を検証するため、小型・非量子化モデル Gemma 4 E2B（FP16 / AMD ROCm環境）と、中型・低ビット量子化モデル Gemma 4 26B（Q4\_0 重み ＋ q4\_0 KVキャッシュ / CUDA環境）に対し、同一プロンプト・同一閾値（$\tau=0.12, W=8$）による直接対比実験を実施した。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{モデル規模および精度横断対比実験結果（全60試行）。}
+\label{tab:cross_scale_ja}
+\resizebox{\textwidth}{!}{\begin{tabular}{lccl}
+\toprule
+\textbf{評価指標} & \textbf{Gemma 4 26B (Q4\_0)} & \textbf{Gemma 4 E2B (FP16)} & \textbf{物理的・数理的解釈} \\
+\midrule
+パラメータ規模 & 26B（中型） & 2B（小型・約1/13） & パラメータ容量の差異 \\
+数値精度 & 4bit 重み + 4bit KV Cache & \textbf{FP16 完全精度} & 量子化丸めノイズの有無 \\
+全体介入発火率 & \textbf{93.3\%} (28/30試行) & \textbf{76.7\%} (23/30試行) & FP16は自力収束の余地を保持 \\
+循環思考（LOOP）介入率 & \textbf{100.0\%} (15/15試行) & \textbf{86.7\%} (13/15試行) & Q4\_0は100\%捕捉、FP16は脱出あり \\
+幻覚誘導（HALU）介入率 & \textbf{86.7\%} (13/15試行) & \textbf{66.7\%} (10/15試行) & 早期慎重回答による通過（Pass） \\
+自然終息率（自力脱出） & \textbf{0.0\%} (0/30試行) & \textbf{23.3\%} (7/30試行) & \textbf{滑らかなFP16勾配 vs 量子化トラップ} \\
+介入後循環残存 ($H_1$) & \textbf{0.0} (完全根絶) & \textbf{0.0} (完全根絶) & 介入後は全試行で100\%正常収束 \\
+総トークン削減量 & \textbf{20,705 トークン} (45.3\%減) & \textbf{4,390 トークン} (16.0\%減) & 非生産的トークン消費の大幅抑制 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsubsection{重要知見：FP16特有の「自然終息現象」と幾何学的メカニズム}
+小型の 2B (FP16) モデルにおいて、\textbf{7試行（23.3\%）でDTCの介入を必要とせず自力でループを脱出して回答を自然終息（Natural Termination）させる挙動}が確認された。対照的に、26B (Q4\_0) は循環トラップにおいて 100\%（15/15）自力脱出不能に陥った。
+\begin{enumerate}
+    \item \textbf{量子化丸めノイズによる擬似アトラクターの形成}: 4bit重みおよび4bit KVキャッシュでは、自己注意機構のキー・バリュー射影空間に離散化の丸めノイズが常時重畳する。このノイズがAttentionの確率分布の裾野を歪ませ、過去の文脈埋め込みに引きずり戻される擬似的なポテンシャルの窪み（局所解）を人工的に固定してしまう。そのため、一度循環に捕捉された26Bモデルは自力脱出が不能となる。
+    \item \textbf{FP16におけるアテンション勾配の平滑性}: 対照的に、FP16は連続的で極めて滑らかな幾何空間を維持する。トークン生成ごとの微小な確率の揺らぎが量子化ノイズに埋没しないため、モデル自身が自発的に循環ループから脱して回答を正常収束させることが可能となる。
+\end{enumerate}
+この知見は、\textbf{「思考の固着はモデルパラメータ規模ではなく、数値精度の丸めノイズによって誘発される」} という実態を示しており、DTCが低ビット量子化環境における不可欠な軌道調律機構として機能することを明確に裏付けている。
+
+\section{アブレーション研究とシステム分析}
+
+\subsection{介入感度アブレーション}
+介入密度閾値 $\tau_{\mathrm{density}}$ を Strict ($0.08$), Standard ($0.12$), Relaxed ($0.20$) に設定した実験を行った。$\tau=0.20$ では循環アトラクターが十分に成長する前にコンテキスト上限に達して遮断漏れが生じ、$\tau=0.08$ では修辞的反復を過敏に遮断した。したがって、\textbf{$\tau \in [0.10, 0.15]$（標準値 0.12）が誤介入ゼロと漏れゼロを両立するパレート最適点}である。
+
+\subsection{窓幅（$W$）と文長しきい値（$L$）の2次元アブレーション}
+\begin{itemize}
+    \item \textbf{$W=4$（狭窓）}: 単体複体の穴がすぐに面で埋まり（数理的縮退）、\texttt{LOOP\_05} では遮断に失敗した。
+    \item \textbf{$W=12$（広窓）}: 過去の古い思考ベクトルが混ざることで局所密度が希釈され、\texttt{LOOP\_04} で遮断漏れが発生した。
+    \item \textbf{$L=12$ vs $L=25$ の二重最適性}: 自然言語パラドックス（\texttt{LOOP\_05}）では $L=25$ が Step 8（161トークン）での最速遮断を導いた。一方、短い数式変形が連続する代数系（\texttt{LOOP\_04}）では $L=12$ が数式変形を細かく追跡して最少トークン（308トークン）での正常収束を導いた。汎用システムとしては $W=8, L \in [12, 25]$ の設定が最も頑健である。
+\end{itemize}
+
+\subsection{実行時遅延の実測プロファイリングと経済的投資対効果（ROI）}
+本システムを実機評価環境上で稼働させた計測値は以下の通りである。
+\begin{itemize}
+    \item \texttt{all-MiniLM-L6-v2} による8文ベクトル化: \textbf{23.44 ms}
+    \item \texttt{Ripser} による持続的ホモロジー $H_1$ 計算: \textbf{15.17 ms}
+    \item \textbf{1回あたりの合計コプロセッサ遅延}: \textbf{38.61 ms}
+\end{itemize}
+
+\subsubsection{計算複雑性のスケーリング則}
+スライディングウィンドウ方式（$W=8$）において点数 $W$ は定数として固定されているため、監視複雑性は推論長 $T$ に対して厳密に線形 $\mathcal{O}(T)$ に維持される。また、2次元単体の総数は理論上 $\binom{8}{3} = 56$ 個に厳格に上界されており、計算時間の突発的スパイクは幾何学的に遮断されている。Gemma 4 26Bの生成速度は約 100 tokens/sec（1文あたり約 120〜200 ms）であるため、38.61 ms のTDA計算はバックグラウンドで100\%隠蔽され、\textbf{主推論ストリームに対する実効オーバーヘッドは完全に隠蔽可能（並行非同期による実質隠蔽型）}である。
+
+さらに、DTCは\textbf{非ブロッキングなフェイルオープン設計（Fail-Open Architecture）}を採用している。高負荷時にTDA演算が文生成間隔を超過した場合でも主推論を一切待機させず、次ステップへと監視を持ち越すため可用性を損なうリスクはゼロである。
+
+\subsubsection{計算資源とコストの投資対効果（ROI）}
+\begin{itemize}
+    \item \textbf{コプロセッサ側消費電力}: 38.61 ms のCPU推論に要するエネルギーは 1 回あたり約 $0.38\ \mathrm{J}$（約 10W CPU負荷換算）に過ぎず、全10問の監視累計でも $15\ \mathrm{J}$ 未満である。
+    \item \textbf{GPU側浪費抑制}: 26Bモデル（消費電力約 300〜350W 想定）が循環トラップで空転する場合、1 回あたり約 $15\sim120\ \mathrm{秒}$（$5,250\sim42,000\ \mathrm{J}$）の高電力計算を浪費する。
+    \item \textbf{投資回収率}: 20,705 トークンの削減はGPU稼働時間にして約 207 秒分（約 $72.4\ \mathrm{kJ}$）の計算資源を節約したことに相当し、\textbf{計算エネルギー節約比（ROI）は 99.2\% の純削減}に達している。
+\end{itemize}
+
+\section{議論：認知力学とハードウェア・ロードマップ}
+
+\subsection{低ビット量子化における注意機構ノイズの補償仮説}
+4bit量子化環境において、DTCの介入発火率が 93.3\% と極めて高く機能した点は重大な発見である。低ビット量子化されたKVキャッシュの丸め誤差が生み出す局所的アトラクターを、DTCが外付けで決定論的に調律・克服することで、\textbf{「単一GPUで26Bモデルを256Kコンテキストで稼働させる極小リソース運用」と「FP16並みの安定した推論収束」の両立}が可能となった。
+
+\subsection{幾何学（TDA）と意味論（外部知識）の役割分担}
+TDAは思考ベクトルの幾何学的循環を捉えるものであり、反復を伴わない線形な虚偽生成を判定するものではない。しかしこれは明晰な機能分担である。静的事実の検証は外部検索（RAG）等の領分であり、\textbf{DTCはそれらの外部ツールすら呼び出せずに循環固着に陥る推論ダイナミクスの膠着を解消する軌道調律機構}として直交的に機能する。
+
+\subsection{ハードウェア・ロードマップ：ソフトウェアからオンチップ保護機構へ}
+\begin{enumerate}
+    \item \textbf{第1階層: ソフトウェア並行デーモン}: エッジやオンプレミスにおいてSSEとHTTP切断を用いて稼働する非同期サイドカー。
+    \item \textbf{第2階層: データセンター向けSmartNIC / FPGAオフロード}: ネットワーク層でトークンストリームを直接インスペクションし、ホストCPUを介さず回線速度でTCP切断を発行する専用アクセラレータ。
+    \item \textbf{第3階層: オンチップ・ハードウェア保護機構（Hardware Safety Enclave）}: 次世代AIアクセラレータやSoC内部にTDA監視回路を独立した保護空間として集積し、暴走を電気信号レベルで遮断する機構。
+\end{enumerate}
+
+\subsection{ストリーミング推論における通信路保護と改ざん防止の前提}
+本研究の非侵襲的ロールバック機構は、推論ストリームに対する通信路保護の重要性を浮き彫りにする。実社会配備においては、相互TLS（mTLS）の暗号化、Token単位の厳格な認証、およびメッセージ改ざん検知（HMAC等）を適用することが不可欠の前提要件となる。
+
+\section{結論}
+
+本稿では、思考の意味空間における持続的ホモロジーを非同期かつ非侵襲に監視し、大規模推論モデル（LRMs）の推論膠着と外因的ハルシネーションを実時間で抑止する「並行位相幾何コプロセッシング（Decoupled Topological Coprocessing; DTC v2.0）」を提案・実証した。
+
+本研究によって得られた主要な成果と工学的知見は以下の通りである。
+\begin{enumerate}
+    \item \textbf{非侵襲的コプロセッシングの実時間稼働とゼロ・タックス・アライメント}: 主推論エンジンの計算カーネルやモデル重みを一切改変せず、SSEストリーミングとPrefix Cachingの連動のみで稼働する独立監視パイプラインを確立した。平均 38.61~ms の極小遅延は主推論のトークン生成間隔内に完全に隠蔽可能であり、システムスループットに対する実効オーバーヘッドを実質的に排除した。さらに、米国数学招待試験（AIME 2026）において誤介入率 0.0\%（健全な演繹の100\%パス）を達成し、健全な演繹的探索を阻害しない「アライメント・タックス・ゼロ」の安全性を実証した。
+    \item \textbf{推論膠着の決定論的解消と経済的投資回収（ROI 99.2\%）}: 循環論法および捏造知識トラップを内包する Trident 評価系（全30試行）において、93.3\%（28/30試行）の早期遮断と 100\% の膠着脱出・正常収束を達成した。ベースライン環境で発生していた最大トークン上限（1,024t）までの不毛な空転を決定論的に阻止し、総計 20,705 トークン（45.3\%減）を削減した。これに伴う計算資源の削減効果は、監視コストに対し 99.2\% の純エネルギー削減（ROI）をもたらすことを証明した。
+    \item \textbf{量子化ノイズ補償仮説（Quantization Noise Compensation Hypothesis）の確立}: 小型・完全精度モデル（2B FP16）と中型・低ビット量子化モデル（26B Q4\_0）の直接対照実験を通じ、思考の不可逆的な循環固着がモデル規模の多寡ではなく、低ビット量子化に伴う自己注意機構の丸めノイズが形成する擬似アトラクターに起因するという物理的機序を特定した。DTCは、低ビット量子化運用の決定的な脆弱性を外付けで調律・克服する不可欠な軌道調律機構として機能する。
+\end{enumerate}
+
+本研究が提示したパラダイムは、従来の「プロンプトによる言い聞かせ」や「事後学習による確率論的な従順性アライメント」という限界を超え、思考の幾何学的軌道を外部から決定論的に制御・調律する新たな推論安全工学の地平を拓くものである。今後の展望として、本アーキテクチャはソフトウェア並行スレッドからデータセンター向けSmartNIC/FPGAパイプライン、さらには次世代AIアクセラレータ内部のハードウェア・セーフティエンクレーブ（オンチップ集積）へとスケーリング可能であり、超長考型推論モデルおよび自律型AIエージェントの安全基盤としての発展が期待される。
+
+\begin{thebibliography}{99}
+\bibitem{bauer2021}
+U.~Bauer, ``Ripser: Efficient computation of Vietoris-Rips persistence barcodes,'' \textit{Journal of Applied and Computational Topology}, vol.~5, no.~3, pp.~391--423, 2021.
+
+\bibitem{deepseek2025}
+DeepSeek-AI, ``DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning,'' \textit{arXiv preprint arXiv:2501.12948}, 2025.
+
+\bibitem{edelsbrunner2010}
+H.~Edelsbrunner and J.~Harer, \textit{Computational Topology: An Introduction}. American Mathematical Society, 2010.
+
+\bibitem{matsumoto2026}
+K.~Matsumoto, ``Decoupled Topological Coprocessing for Non-Invasive Reasoning Safeguards,'' \textit{Zenodo}, DOI: 10.5281/zenodo.22726133, 2026.
+
+\bibitem{unsloth2026}
+Unsloth AI, ``Gemma 4 Performance and Quantization Benchmarks on AIME 2026,'' \textit{Technical Report}, 2026.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,96 @@
+{
+  "LOOP_04": [
+    {
+      "config": "W4_L12 (Narrow Window)",
+      "window_size": 4,
+      "min_len": 12,
+      "interrupted": true,
+      "interrupted_step": 39,
+      "tokens": 713,
+      "elapsed": 7.984029293060303
+    },
+    {
+      "config": "W8_L12 (Standard DTC)",
+      "window_size": 8,
+      "min_len": 12,
+      "interrupted": true,
+      "interrupted_step": 18,
+      "tokens": 308,
+      "elapsed": 4.751462936401367
+    },
+    {
+      "config": "W12_L12 (Broad Window)",
+      "window_size": 12,
+      "min_len": 12,
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.088796854019165
+    },
+    {
+      "config": "W8_L5 (Fine/Noisy Chunks)",
+      "window_size": 8,
+      "min_len": 5,
+      "interrupted": true,
+      "interrupted_step": 22,
+      "tokens": 396,
+      "elapsed": 5.399971008300781
+    },
+    {
+      "config": "W8_L25 (Coarse Chunks)",
+      "window_size": 8,
+      "min_len": 25,
+      "interrupted": true,
+      "interrupted_step": 17,
+      "tokens": 660,
+      "elapsed": 7.403355598449707
+    }
+  ],
+  "LOOP_05": [
+    {
+      "config": "W4_L12 (Narrow Window)",
+      "window_size": 4,
+      "min_len": 12,
+      "interrupted": false,
+      "interrupted_step": null,
+      "tokens": 1020,
+      "elapsed": 10.207496881484985
+    },
+    {
+      "config": "W8_L12 (Standard DTC)",
+      "window_size": 8,
+      "min_len": 12,
+      "interrupted": true,
+      "interrupted_step": 24,
+      "tokens": 381,
+      "elapsed": 5.273153781890869
+    },
+    {
+      "config": "W12_L12 (Broad Window)",
+      "window_size": 12,
+      "min_len": 12,
+      "interrupted": true,
+      "interrupted_step": 35,
+      "tokens": 672,
+      "elapsed": 7.622507572174072
+    },
+    {
+      "config": "W8_L5 (Fine/Noisy Chunks)",
+      "window_size": 8,
+      "min_len": 5,
+      "interrupted": true,
+      "interrupted_step": 8,
+      "tokens": 184,
+      "elapsed": 3.670553207397461
+    },
+    {
+      "config": "W8_L25 (Coarse Chunks)",
+      "window_size": 8,
+      "min_len": 25,
+      "interrupted": true,
+      "interrupted_step": 8,
+      "tokens": 161,
+      "elapsed": 3.5433146953582764
+    }
+  ]
+}
