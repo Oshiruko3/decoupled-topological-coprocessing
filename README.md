@@ -8,7 +8,7 @@
 [![DTC v3.0 Paper: PDF (EN)](https://img.shields.io/badge/DTC%20v3.0%20Paper-PDF%20(EN)-blue.svg)](paper/v3/dtc_v3_paper_en.pdf)
 [![DTC v3.0 Paper: PDF (JA)](https://img.shields.io/badge/DTC%20v3.0%20Paper-PDF%20(JA)-red.svg)](paper/v3/dtc_v3_paper_ja.pdf)
 [![DTC v2.0 Paper Archive](https://img.shields.io/badge/DTC%20v2.0-Archive-gray.svg)](paper/v2/)
-[![DTS Position Paper](https://img.shields.io/badge/DTS%20Paper-Position%20Paper-purple.svg)](paper/dts/)
+[![DTS Position Paper](https://img.shields.io/badge/DTS%20Paper-Position%20Paper-purple.svg)](paper/dts-position-paper/)
 
 > **Author**: Kouta Matsumoto (Independent Researcher)  
 > Email: `Oshiruko3@users.noreply.github.com`  
@@ -74,7 +74,7 @@ DTC v3.0 introduces the **Kinematic Intermediate Fork Paradigm**, which extracts
 
 ## Empirical Benchmark Results (Unconstrained 8k Streams)
 
-Evaluated across 30 live streaming runs with an unconstrained context budget of $\text{max\_tokens} = 8,192$ comparing **Gemma 4 26B (4-bit Q4_0)** and **Gemma 4 E2B (FP16 unquantized)** ($N=3$ independent replicates, 989 evaluated steps):
+Evaluated across 30 live streaming runs with an unconstrained context budget of `max_tokens = 8,192` comparing **Gemma 4 26B (4-bit Q4_0)** and **Gemma 4 E2B (FP16 unquantized)** ($N=3$ independent replicates, 989 evaluated steps):
 
 ### Comprehensive Scenario Comparison
 

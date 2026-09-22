@@ -8,7 +8,7 @@
 [![DTC v3.0 論文: PDF (日本語版)](https://img.shields.io/badge/DTC%20v3.0%20論文-PDF%20(JA)-red.svg)](paper/v3/dtc_v3_paper_ja.pdf)
 [![DTC v3.0 Paper: PDF (英語版)](https://img.shields.io/badge/DTC%20v3.0%20Paper-PDF%20(EN)-blue.svg)](paper/v3/dtc_v3_paper_en.pdf)
 [![DTC v2.0 アーカイブ](https://img.shields.io/badge/DTC%20v2.0-Archive-gray.svg)](paper/v2/)
-[![DTS ポジションペーパー](https://img.shields.io/badge/DTS%20Paper-Position%20Paper-purple.svg)](paper/dts/)
+[![DTS ポジションペーパー](https://img.shields.io/badge/DTS%20Paper-Position%20Paper-purple.svg)](paper/dts-position-paper/)
 
 > **著者**: 松本 幸太（Kouta Matsumoto / 独立研究者）  
 > 連絡先: `Oshiruko3@users.noreply.github.com`  
