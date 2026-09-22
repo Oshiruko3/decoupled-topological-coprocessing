@@ -132,10 +132,14 @@ decoupled-topological-coprocessing/
 │   └── dts/                       # 独立型セーフガード（DTS）ポジションペーパー
 │
 ├── scripts/                       # 実機ベンチマーク実行および分析スクリプト群
-│   ├── analyze_benchmarks.py      # 統計集計スクリプト
-│   ├── benchmark_dtc_v3_e2b.py    # E2B FP16 ベンチマーク実行スクリプト
-│   ├── benchmark_dtc_v3_tri_replicate.py # 26B Q4 3反復実験スクリプト
-│   └── validate_dtc_v3_live.py    # 実ストリーム検証スクリプト
+│   ├── v1/                        # DTC v1.0 初期遅延・統計実験コード
+│   │   ├── run_latency_overhead_benchmark.py
+│   │   └── run_statistical_benchmark.py
+│   └── v3/                        # ★ DTC v3.0 実機対照実験・分析コード
+│       ├── benchmark_dtc_v3_tri_replicate.py
+│       ├── benchmark_dtc_v3_e2b.py
+│       ├── validate_dtc_v3_live.py
+│       └── analyze_benchmarks.py
 │
 ├── src/                           # コア実装
 │   ├── shadow_core.py             # ★ DTC v3.0 中間フォーク・コプロセッサ

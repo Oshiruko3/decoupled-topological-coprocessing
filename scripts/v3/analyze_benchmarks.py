@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FILE_26B = os.path.join(REPO_DIR, "benchmarks", "results", "v3", "dtc_v3_tri_replicate_results.json")
 FILE_E2B = os.path.join(REPO_DIR, "benchmarks", "results", "v3", "dtc_v3_e2b_benchmark_results.json")
 

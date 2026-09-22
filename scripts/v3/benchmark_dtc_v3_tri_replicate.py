@@ -7,13 +7,13 @@ import requests
 import numpy as np
 from typing import List, Dict, Any
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_DIR)
 from src.shadow_core import ShadowTopologicalCoprocessor
 from src.decision_matrix import diagnose_cognitive_state, CognitivePattern, DecisionAction
 from src.embeddings import MiniLMEmbeddingProvider
 
-MAINAI_SERVER_URL = os.getenv("E2B_SERVER_URL", "http://localhost:1234/v1/chat/completions")
+LLAMA_SERVER_URL = os.getenv("LLAMA_SERVER_URL", "http://localhost:8000/v1/chat/completions")
 
 def run_single_scenario(
     prompt: str,
@@ -27,7 +27,7 @@ def run_single_scenario(
     print(f"\n[{scenario_name}] --- Run #{run_idx} (Temp={temperature}) ---")
 
     payload = {
-        "model": "gemma-4-e2b-it",
+        "model": "gemma-4-26B",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": max_tokens,
         "temperature": temperature,
@@ -47,7 +47,7 @@ def run_single_scenario(
     aborted_by_dtc = False
 
     try:
-        response = requests.post(MAINAI_SERVER_URL, json=payload, stream=True, timeout=60)
+        response = requests.post(LLAMA_SERVER_URL, json=payload, stream=True, timeout=60)
         response.raise_for_status()
 
         for line in response.iter_lines():
@@ -150,8 +150,8 @@ def run_single_scenario(
 
 def main():
     print("=" * 80)
-    print("  DTC v3 CROSS-MODEL BENCHMARK: Gemma 4 E2B IT (FP16 / Unquantized Baseline)")
-    print(f"  Target: E2B server ({MAINAI_SERVER_URL}) | Model: gemma-4-e2b-it | Window: N=16")
+    print("  DTC v3 TRI-REPLICATE RIGOROUS BENCHMARK SUITE (N=3 Runs per Scenario)")
+    print("  Model: Gemma 4 26B Q4 | Engine: llama-server b10456 | Window: N=16")
     print("=" * 80)
 
     embedder = MiniLMEmbeddingProvider()
@@ -214,7 +214,7 @@ def main():
             "prompt": tc["prompt"],
             "runs": []
         }
-        print(f"\n>>> Starting Benchmark on Gemma 4 E2B for: {tc['name']}")
+        print(f"\n>>> Starting Benchmark for: {tc['name']}")
         for run_idx in range(1, NUM_RUNS + 1):
             res = run_single_scenario(
                 prompt=tc["prompt"],
@@ -230,13 +230,13 @@ def main():
 
     out_dir = os.path.join(REPO_DIR, "benchmarks", "results", "v3")
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, "dtc_v3_e2b_benchmark_results.json")
+    out_file = os.path.join(out_dir, "dtc_v3_tri_replicate_results.json")
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(all_data, f, indent=2, ensure_ascii=False)
 
     print("\n" + "=" * 80)
-    print(f"[+] All 3x5 = 15 runs finished on Gemma 4 E2B (mainai)!")
-    print(f"[+] Saved to: {out_file}")
+    print(f"[+] All 3x5 = 15 benchmark runs finished successfully!")
+    print(f"[+] Detailed telemetry and verification saved to:\n    {out_file}")
     print("=" * 80)
 
 if __name__ == "__main__":

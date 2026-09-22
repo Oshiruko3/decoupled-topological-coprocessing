@@ -132,10 +132,14 @@ decoupled-topological-coprocessing/
 │   └── dts/                       # Decoupled Topological Safeguard (DTS) position paper
 │
 ├── scripts/                       # Benchmark execution and empirical analysis scripts
-│   ├── analyze_benchmarks.py      # Statistical aggregation tool
-│   ├── benchmark_dtc_v3_e2b.py    # E2B FP16 benchmark runner
-│   ├── benchmark_dtc_v3_tri_replicate.py # 26B Q4 tri-replicate runner
-│   └── validate_dtc_v3_live.py    # Live streaming validation script
+│   ├── v1/                        # DTC v1.0 latency and statistical experiments
+│   │   ├── run_latency_overhead_benchmark.py
+│   │   └── run_statistical_benchmark.py
+│   └── v3/                        # ★ DTC v3.0 unconstrained 8k benchmark runners
+│       ├── benchmark_dtc_v3_tri_replicate.py
+│       ├── benchmark_dtc_v3_e2b.py
+│       ├── validate_dtc_v3_live.py
+│       └── analyze_benchmarks.py
 │
 ├── src/                           # Core implementation
 │   ├── shadow_core.py             # ★ DTC v3.0 Kinematic Intermediate Fork Coprocessor

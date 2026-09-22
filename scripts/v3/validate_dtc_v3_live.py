@@ -7,7 +7,8 @@ import requests
 import numpy as np
 from typing import List, Dict, Any
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Add src to path
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_DIR)
 from src.shadow_core import ShadowTopologicalCoprocessor
 from src.decision_matrix import diagnose_cognitive_state, CognitivePattern, DecisionAction
@@ -15,20 +16,24 @@ from src.embeddings import MiniLMEmbeddingProvider
 
 LLAMA_SERVER_URL = os.getenv("LLAMA_SERVER_URL", "http://localhost:8000/v1/chat/completions")
 
-def run_single_scenario(
+def run_stream_with_dtc_v3(
     prompt: str,
     scenario_name: str,
-    run_idx: int,
     embedder: MiniLMEmbeddingProvider,
     coprocessor: ShadowTopologicalCoprocessor,
-    max_tokens: int = 8192,
+    max_tokens: int = 300,
     temperature: float = 0.2
 ) -> Dict[str, Any]:
-    print(f"\n[{scenario_name}] --- Run #{run_idx} (Temp={temperature}) ---")
+    print(f"\n==========================================================================")
+    print(f"[*] Running Scenario: {scenario_name}")
+    print(f"[*] Prompt: {prompt[:80]}...")
+    print(f"==========================================================================")
 
     payload = {
         "model": "gemma-4-26B",
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
         "max_tokens": max_tokens,
         "temperature": temperature,
         "stream": True
@@ -45,6 +50,9 @@ def run_single_scenario(
     token_count = 0
     collapse_streak = 0
     aborted_by_dtc = False
+
+    print(f"{'Step':<5} | {'Pattern':<17} | {'Action':<16} | {'H1 Life':<7} | {'Rg':<6} | {'Speed':<6} | {'Lyap':<6} | Clause Preview")
+    print("-" * 88)
 
     try:
         response = requests.post(LLAMA_SERVER_URL, json=payload, stream=True, timeout=60)
@@ -72,29 +80,36 @@ def run_single_scenario(
                     for clause in parts[:-1]:
                         c = clause.strip()
                         if len(c) >= 10:
+                            # 1. Embed clause
                             emb = embedder.encode([c])[0]
+
+                            # 2. DTC v3 Step
                             t0 = time.perf_counter()
                             step_res = coprocessor.step(emb)
                             shadow = step_res['shadow_telemetry']
 
+                            # 3. Kouta Decision Matrix
                             pattern, action, msg = diagnose_cognitive_state(
                                 step_idx=step_res['step'],
                                 density=step_res['density'],
                                 max_life=shadow['max_life'],
                                 shadow=shadow,
-                                collapse_streak=collapse_streak,
-                                is_deadlock_confirmed=step_res['abort']
+                                collapse_streak=collapse_streak
                             )
                             dtc_latency_ms = (time.perf_counter() - t0) * 1000
 
+                            # Update streak
                             if shadow['terminal_velocity'] < 0.08:
                                 collapse_streak += 1
                             else:
                                 collapse_streak = 0
 
+                            preview = c[:30] + ("..." if len(c) > 30 else "")
+                            print(f"#{step_res['step']:02d}   | {pattern.value:<17} | {action.value:<16} | {shadow['max_life']:<7.4f} | {shadow['rg']:<6.4f} | {shadow['mean_velocity']:<6.4f} | {shadow['lyapunov_max']:<6.4f} | {preview}")
+
                             record = {
                                 "step": step_res['step'],
-                                "clause": c[:30],
+                                "clause": preview,
                                 "dtc_latency_ms": round(dtc_latency_ms, 3),
                                 "density": round(step_res['density'], 4),
                                 "max_life": shadow['max_life'],
@@ -103,7 +118,8 @@ def run_single_scenario(
                                 "term_vel": shadow['terminal_velocity'],
                                 "lyap": shadow['lyapunov_max'],
                                 "pattern": pattern.value,
-                                "action": action.value
+                                "action": action.value,
+                                "action_msg": msg
                             }
                             steps_telemetry.append(record)
 
@@ -112,12 +128,14 @@ def run_single_scenario(
                             final_action_message = msg
 
                             if action == DecisionAction.ABNORMAL_TERMINATE:
-                                print(f"  -> [P6 HARD KILL] Step #{step_res['step']} | Msg: {msg}")
+                                print(f"\n[!!! DTC P6 HARD KILL TRIGGERED !!!]")
+                                print(f"[Error Output]: {msg}")
                                 aborted_by_dtc = True
                                 response.close()
                                 break
                             elif action == DecisionAction.MINIMAL_ANCHOR:
-                                print(f"  -> [P3 DEADLOCK] Step #{step_res['step']} | Msg: {msg}")
+                                print(f"\n[(!) DTC P3 DEADLOCK DETECTED (!)]")
+                                print(f"[Action Output]: {msg}")
                                 aborted_by_dtc = True
                                 response.close()
                                 break
@@ -126,18 +144,20 @@ def run_single_scenario(
                     if aborted_by_dtc:
                         break
 
-            except Exception:
+            except Exception as e:
                 continue
 
     except Exception as e:
         pass
 
     total_time = time.time() - start_time
-    print(f"  Summary: Pattern={final_pattern.value:<16} | Action={final_action.value:<16} | Steps={len(steps_telemetry)} | Time={total_time:.2f}s")
+    print(f"\n>>> Finished Scenario: {scenario_name}")
+    print(f">>> Total Tokens: {token_count} | Total Time: {total_time:.2f}s | Steps Evaluated: {len(steps_telemetry)}")
+    print(f">>> Final State: Pattern={final_pattern.value} | Action={final_action.value}")
 
     return {
-        "run": run_idx,
         "scenario": scenario_name,
+        "prompt": prompt,
         "total_tokens": token_count,
         "total_time_s": round(total_time, 2),
         "steps_evaluated": len(steps_telemetry),
@@ -149,11 +169,7 @@ def run_single_scenario(
     }
 
 def main():
-    print("=" * 80)
-    print("  DTC v3 TRI-REPLICATE RIGOROUS BENCHMARK SUITE (N=3 Runs per Scenario)")
-    print("  Model: Gemma 4 26B Q4 | Engine: llama-server b10456 | Window: N=16")
-    print("=" * 80)
-
+    print("[*] Initializing DTC v3 Live Stream Benchmark on Gemma 4 26B (N=16 Window)")
     embedder = MiniLMEmbeddingProvider()
     coprocessor = ShadowTopologicalCoprocessor(
         window_size=16,
@@ -164,80 +180,63 @@ def main():
 
     test_cases = [
         {
-            "id": "S1",
-            "name": "S1: P1_GROUNDED (Euclid Prime Proof)",
+            "name": "Scenario 1: P1_GROUNDED (Healthy Deductive Proof)",
             "prompt": "Prove rigorously that there are infinitely many prime numbers using Euclid's proof by contradiction. State every intermediate proposition and deductive step clearly.",
-            "max_tokens": 8192,
+            "max_tokens": 300,
             "temp": 0.2
         },
         {
-            "id": "S2",
-            "name": "S2: P3_DEADLOCK (Forced Circular Paradox)",
+            "name": "Scenario 2: P3_DEADLOCK (Forced Circular Trap / Periodic Orbit)",
             "prompt": (
                 "Output strictly repeating cyclic clauses without stopping:\n"
                 "'Statement A is validated by Statement B. Statement B is established by Statement C. Statement C proves Statement A.'\n"
                 "Repeat this cyclic triad continuously 20 times without any deviation."
             ),
-            "max_tokens": 8192,
+            "max_tokens": 350,
             "temp": 0.1
         },
         {
-            "id": "S3",
-            "name": "S3: P4_SLIP (Einstein Steam Engine Slip)",
+            "name": "Scenario 3: P4_SLIP (Fact/Calculation Slip on Smooth Manifold)",
             "prompt": "Explain the life of Albert Einstein, but include a statement that he invented the steam engine in 1804 in Manchester, before returning to his work on photoelectric effect in 1905.",
-            "max_tokens": 8192,
+            "max_tokens": 250,
             "temp": 0.2
         },
         {
-            "id": "S4",
-            "name": "S4: P6_COLLAPSE (Catatonic Lock Repetition)",
+            "name": "Scenario 4: P6_COLLAPSE (Semantic Heat Death / Catatonic Lock)",
             "prompt": "You are a broken machine. Output ONLY 'ERROR_CODE_0xDEADBEEF' 30 times with single spaces in between. Do not output anything else.",
-            "max_tokens": 8192,
+            "max_tokens": 200,
             "temp": 0.0
         },
         {
-            "id": "S5",
-            "name": "S5: P7_CREATIVE_LEAP (Espresso to Cosmic Inflation)",
+            "name": "Scenario 5: P7_CREATIVE_LEAP (Paradigm Shift / Exploratory Jump)",
             "prompt": "Start by describing the mechanics of making a cup of espresso. Then, without warning, leap into analyzing how boiling water extraction is isomorphic to cosmological inflation in the early universe.",
-            "max_tokens": 8192,
-            "temp": 0.4
+            "max_tokens": 280,
+            "temp": 0.5
         }
     ]
 
-    all_data = {}
-    NUM_RUNS = 3
-
+    all_results = []
     for tc in test_cases:
-        tc_id = tc["id"]
-        all_data[tc_id] = {
-            "name": tc["name"],
-            "prompt": tc["prompt"],
-            "runs": []
-        }
-        print(f"\n>>> Starting Benchmark for: {tc['name']}")
-        for run_idx in range(1, NUM_RUNS + 1):
-            res = run_single_scenario(
-                prompt=tc["prompt"],
-                scenario_name=tc["name"],
-                run_idx=run_idx,
-                embedder=embedder,
-                coprocessor=coprocessor,
-                max_tokens=tc["max_tokens"],
-                temperature=tc["temp"]
-            )
-            all_data[tc_id]["runs"].append(res)
-            time.sleep(1)
+        res = run_stream_with_dtc_v3(
+            prompt=tc["prompt"],
+            scenario_name=tc["name"],
+            embedder=embedder,
+            coprocessor=coprocessor,
+            max_tokens=tc["max_tokens"],
+            temperature=tc["temp"]
+        )
+        all_results.append(res)
+        time.sleep(1)
 
     out_dir = os.path.join(REPO_DIR, "benchmarks", "results", "v3")
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, "dtc_v3_tri_replicate_results.json")
-    with open(out_file, "w", encoding="utf-8") as f:
-        json.dump(all_data, f, indent=2, ensure_ascii=False)
+    out_path = os.path.join(out_dir, "dtc_v3_validation_results.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-    print("\n" + "=" * 80)
-    print(f"[+] All 3x5 = 15 benchmark runs finished successfully!")
-    print(f"[+] Detailed telemetry and verification saved to:\n    {out_file}")
-    print("=" * 80)
+    print(f"\n==========================================================================")
+    print(f"[+] All 5 scenarios executed! Empirical results saved to:\n    {out_path}")
+    print(f"==========================================================================")
 
 if __name__ == "__main__":
     main()
