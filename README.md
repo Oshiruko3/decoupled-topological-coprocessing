@@ -129,7 +129,7 @@ decoupled-topological-coprocessing/
 │   │   ├── dtc_v3_paper_ja.pdf    # Japanese Paper (PDF, 9 pages)
 │   │   ├── dtc_v3_paper_ja.tex    # Japanese LaTeX source
 │   │   └── dtc_v3_paper_ja_draft.md # Japanese Draft (Markdown)
-│   └── dts/                       # Decoupled Topological Safeguard (DTS) position paper
+│   └── dts-position-paper/        # Decoupled Topological Supervision (DTS) position paper
 │
 ├── scripts/                       # Benchmark execution and empirical analysis scripts
 │   ├── v1/                        # DTC v1.0 latency and statistical experiments

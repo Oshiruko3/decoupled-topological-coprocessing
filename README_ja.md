@@ -129,7 +129,7 @@ decoupled-topological-coprocessing/
 │   │   ├── dtc_v3_paper_en.pdf    # 英語版論文（PDF、9ページ）
 │   │   ├── dtc_v3_paper_en.tex    # 英語版 LaTeX ソース（pdfLaTeX）
 │   │   └── dtc_v3_paper_en_draft.md # 英語版ドラフト原稿
-│   └── dts/                       # 独立型セーフガード（DTS）ポジションペーパー
+│   └── dts-position-paper/        # 独立型セーフガード（DTS）ポジションペーパー
 │
 ├── scripts/                       # 実機ベンチマーク実行および分析スクリプト群
 │   ├── v1/                        # DTC v1.0 初期遅延・統計実験コード
