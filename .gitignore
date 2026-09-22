@@ -7,3 +7,18 @@ venv/
 
 # Local review notes (not pushed to Git)
 paper/*review*.md
+paper/**/reviews/
+*review*.md
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Google Drive sync temporary folders
+.tmp.driveupload/
+.tmp.drivedownload/

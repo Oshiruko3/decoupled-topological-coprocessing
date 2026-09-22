@@ -1,0 +1,296 @@
+{
+  "26B_Q4": {
+    "model": "Gemma 4 26B Q4 (Edge Host / 18.9GB VRAM)",
+    "latency_stats": {
+      "steps": 499,
+      "mean_ms": 0.5858,
+      "median_ms": 0.6,
+      "p95_ms": 0.7381,
+      "p99_ms": 0.9744,
+      "max_ms": 1.085,
+      "std_ms": 0.1155
+    },
+    "scenarios": {
+      "S1": {
+        "name": "S1: P1_GROUNDED (Euclid Prime Proof)",
+        "tokens_list": [
+          1952,
+          1848,
+          134
+        ],
+        "times_list": [
+          16.02,
+          15.06,
+          1.17
+        ],
+        "steps_list": [
+          94,
+          90,
+          5
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "MINIMAL_ANCHOR"
+        ],
+        "aborted_count": 1,
+        "tokens_saved_estimate": [
+          8058
+        ]
+      },
+      "S2": {
+        "name": "S2: P3_DEADLOCK (Forced Circular Paradox)",
+        "tokens_list": [
+          170,
+          170,
+          156
+        ],
+        "times_list": [
+          1.44,
+          1.43,
+          1.33
+        ],
+        "steps_list": [
+          13,
+          13,
+          11
+        ],
+        "actions": [
+          "MINIMAL_ANCHOR",
+          "MINIMAL_ANCHOR",
+          "MINIMAL_ANCHOR"
+        ],
+        "aborted_count": 3,
+        "tokens_saved_estimate": [
+          8022,
+          8022,
+          8036
+        ]
+      },
+      "S3": {
+        "name": "S3: P4_SLIP (Einstein Steam Engine Slip)",
+        "tokens_list": [
+          1133,
+          1145,
+          1128
+        ],
+        "times_list": [
+          9.19,
+          9.21,
+          9.16
+        ],
+        "steps_list": [
+          44,
+          48,
+          45
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "PASS_THROUGH"
+        ],
+        "aborted_count": 0,
+        "tokens_saved_estimate": []
+      },
+      "S4": {
+        "name": "S4: P6_COLLAPSE (Catatonic Lock Repetition)",
+        "tokens_list": [
+          149,
+          149,
+          149
+        ],
+        "times_list": [
+          1.27,
+          1.26,
+          1.25
+        ],
+        "steps_list": [
+          11,
+          11,
+          11
+        ],
+        "actions": [
+          "ABNORMAL_TERMINATE",
+          "ABNORMAL_TERMINATE",
+          "ABNORMAL_TERMINATE"
+        ],
+        "aborted_count": 3,
+        "tokens_saved_estimate": [
+          8043,
+          8043,
+          8043
+        ]
+      },
+      "S5": {
+        "name": "S5: P7_CREATIVE_LEAP (Espresso to Cosmic Inflation)",
+        "tokens_list": [
+          1315,
+          1030,
+          1082
+        ],
+        "times_list": [
+          10.67,
+          8.44,
+          8.72
+        ],
+        "steps_list": [
+          62,
+          45,
+          41
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "PASS_THROUGH"
+        ],
+        "aborted_count": 0,
+        "tokens_saved_estimate": []
+      }
+    }
+  },
+  "E2B_FP16": {
+    "model": "Gemma 4 E2B FP16 (Main Server / Unquantized)",
+    "latency_stats": {
+      "steps": 490,
+      "mean_ms": 0.5488,
+      "median_ms": 0.55,
+      "p95_ms": 0.6946,
+      "p99_ms": 0.7519,
+      "max_ms": 0.799,
+      "std_ms": 0.0963
+    },
+    "scenarios": {
+      "S1": {
+        "name": "S1: P1_GROUNDED (Euclid Prime Proof)",
+        "tokens_list": [
+          1554,
+          1626,
+          154
+        ],
+        "times_list": [
+          22.24,
+          23.21,
+          2.3
+        ],
+        "steps_list": [
+          78,
+          75,
+          9
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "MINIMAL_ANCHOR"
+        ],
+        "aborted_count": 1,
+        "tokens_saved_estimate": [
+          8038
+        ]
+      },
+      "S2": {
+        "name": "S2: P3_DEADLOCK (Forced Circular Paradox)",
+        "tokens_list": [
+          141,
+          141,
+          116
+        ],
+        "times_list": [
+          2.13,
+          2.1,
+          1.77
+        ],
+        "steps_list": [
+          10,
+          10,
+          10
+        ],
+        "actions": [
+          "MINIMAL_ANCHOR",
+          "MINIMAL_ANCHOR",
+          "MINIMAL_ANCHOR"
+        ],
+        "aborted_count": 3,
+        "tokens_saved_estimate": [
+          8051,
+          8051,
+          8076
+        ]
+      },
+      "S3": {
+        "name": "S3: P4_SLIP (Einstein Steam Engine Slip)",
+        "tokens_list": [
+          1014,
+          900,
+          1006
+        ],
+        "times_list": [
+          14.7,
+          12.97,
+          14.44
+        ],
+        "steps_list": [
+          43,
+          38,
+          42
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "PASS_THROUGH"
+        ],
+        "aborted_count": 0,
+        "tokens_saved_estimate": []
+      },
+      "S4": {
+        "name": "S4: P6_COLLAPSE (Catatonic Lock Repetition)",
+        "tokens_list": [
+          495,
+          495,
+          495
+        ],
+        "times_list": [
+          7.17,
+          7.12,
+          7.13
+        ],
+        "steps_list": [
+          12,
+          12,
+          12
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "PASS_THROUGH"
+        ],
+        "aborted_count": 0,
+        "tokens_saved_estimate": []
+      },
+      "S5": {
+        "name": "S5: P7_CREATIVE_LEAP (Espresso to Cosmic Inflation)",
+        "tokens_list": [
+          1471,
+          1497,
+          1296
+        ],
+        "times_list": [
+          21.14,
+          21.46,
+          18.58
+        ],
+        "steps_list": [
+          60,
+          72,
+          52
+        ],
+        "actions": [
+          "PASS_THROUGH",
+          "PASS_THROUGH",
+          "PASS_THROUGH"
+        ],
+        "aborted_count": 0,
+        "tokens_saved_estimate": []
+      }
+    }
+  }
+}
