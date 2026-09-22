@@ -4,9 +4,8 @@ authors:
   - family-names: "Matsumoto"
     given-names: "Kouta"
     affiliation: "Independent Researcher"
-title: "Decoupled Topological Coprocessing for Mitigating Reasoning Deadlocks and Non-Invasive Trajectory Steering in Large Language Models (DTC v2.0)"
-version: 2.0.0
-doi: 10.5281/zenodo.22726133
-date-released: 2026-09-16
+title: "Decoupled Topological Coprocessing (DTC v3.0): Sub-Millisecond Intermediate Fork Dynamics and Deterministic Cognitive State Governance for Quantized Reasoning Models"
+version: 3.0.0
+date-released: 2026-09-22
 url: "https://github.com/Oshiruko3/decoupled-topological-coprocessing"
 license: Apache-2.0
